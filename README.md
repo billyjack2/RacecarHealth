@@ -1,20 +1,32 @@
 # RaceCarHealth
 
-Automated health-check and reporting toolkit for race-car CSV telemetry.
+Multi-tenant SaaS for race-car telemetry health-checks. Teams upload
+GEMS CSV exports, run configurable checks against them, and view
+results in a live dashboard plus exportable PDF/HTML reports.
 
 ## Status
 
-Bootstrapping. This repository is being set up in three steps:
+Pre-code. Decisions locked, PRD pending. See `CLAUDE.md` for the
+working context and locked tech/domain decisions.
 
-1. **Install skills** (this commit) — register the Claude Code skill
-   marketplaces we plan to use.
-2. **Author a PRD** — drive out feature set, business cases, and
-   reporting surfaces before any stack decisions.
-3. **Build** — pick a web stack, scaffold modules, implement the
-   analysis engine, dashboard, and local file-watcher agent.
+Next steps:
 
-See `CLAUDE.md` for the working context Claude sessions should load,
-and (once written) `docs/prd.md` for the locked product spec.
+1. **Author the PRD** via `/to-prd` using the planning doc as input.
+2. **Break PRD into issues** via `/to-issues`.
+3. **Build** following the MVP sequence in the planning doc.
+
+## Stack
+
+- **App**: Next.js (App Router) on Vercel
+- **Auth**: Clerk (Organizations as Teams)
+- **DB**: Vercel Postgres
+- **Blobs**: Vercel Blob
+- **Analysis engine**: Python on Modal, behind Inngest for durability
+
+## Input format
+
+v1 accepts **GEMS CSV exports** only. Additional vendors (AiM, MoTeC,
+…) drop in later by adding channel mappings — no engine changes.
 
 ## Quickstart for contributors
 
@@ -33,19 +45,12 @@ Then bootstrap the agent docs (creates `docs/agents/` and updates
 /setup-matt-pocock-skills
 ```
 
-From there, drive the PRD with `/to-prd` and break it into issues with
-`/to-issues`.
-
 ## Planned modules (post-PRD)
 
-- `racecarhealth/agent/` — local file-watcher that auto-uploads new
-  CSV downloads into the system.
-- `racecarhealth/core/` — CSV parsing (AiM + generic), channel model,
-  and the health-check engine (pre-built + user-definable checks).
-- `racecarhealth/web/` — dashboard for browsing sessions, viewing
-  check results, and pulling reports.
-
-## Branch policy
-
-Active development lives on `claude/race-car-data-analysis-d9HFr`
-until the PRD is approved and a default branch is established.
+- `apps/web/` — Next.js app: dashboard, upload UI, check authoring,
+  report export
+- `services/analysis/` — Python on Modal: GEMS CSV parser, channel
+  mapping application, check engine
+- `packages/shared/` — TypeScript types shared between Next.js and the
+  Modal callback contract
+- v2: `apps/agent/` — local file-watcher that auto-uploads new CSVs
