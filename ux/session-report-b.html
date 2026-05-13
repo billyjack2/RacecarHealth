@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session report · Bolt #88 · May 12 — Variant B (Clinical)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6b6b6b;
+      --text-dim: #9a9a9a;
+      --border: #ece8dd;
+      --border-subtle: #f3efe5;
+      --accent: #4a5d4f;
+      --pass: #15803d;
+      --warn: #b45309;
+      --fail: #b91c1c;
+      --pass-bg: #ecfdf5;
+      --warn-bg: #fef3c7;
+      --fail-bg: #fee2e2;
+      --serif: 'Source Serif 4', Georgia, serif;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 40px;
+      padding: 18px 40px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); }
+    .brand svg { height: 26px; }
+    .nav { display: flex; gap: 28px; }
+    .nav a {
+      font-size: 14px; font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 0;
+      border-bottom: 2px solid transparent;
+    }
+    .nav a.active { color: var(--text); border-bottom-color: var(--accent); }
+    .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    .userchip { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); color: white;
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 600;
+    }
+
+    .container { max-width: 1080px; margin: 0 auto; padding: 36px 40px 80px; }
+
+    .crumbs { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .crumbs a { color: var(--text-muted); }
+    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
+    .crumbs .here { color: var(--text); }
+
+    .doc-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: 44px;
+      letter-spacing: -1px;
+      margin: 0 0 8px;
+    }
+    .doc-sub {
+      font-size: 16px; color: var(--text-muted); margin-bottom: 36px;
+    }
+
+    /* Identity card */
+    .identity {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px 36px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 36px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .identity .num {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: 84px;
+      line-height: 0.9;
+      letter-spacing: -3px;
+      color: var(--accent);
+    }
+    .identity h2 {
+      font-family: var(--serif); font-weight: 400;
+      font-size: 32px; margin: 0 0 4px;
+    }
+    .identity .meta {
+      font-size: 14px; color: var(--text-muted);
+    }
+    .identity .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 4px 24px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .meta-grid dt { color: var(--text-muted); }
+    .meta-grid dd { margin: 0; color: var(--text); font-family: var(--mono); font-size: 12px; }
+    .big-verdict {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 14px 22px; border-radius: 999px;
+      font-size: 16px; font-weight: 500;
+    }
+    .big-verdict::before {
+      content: ''; width: 10px; height: 10px; border-radius: 50%;
+      background: currentColor;
+    }
+    .big-verdict.fail { color: var(--fail); background: var(--fail-bg); }
+    .big-verdict.warn { color: var(--warn); background: var(--warn-bg); }
+    .big-verdict.pass { color: var(--pass); background: var(--pass-bg); }
+
+    /* Vitals — soft 4-up */
+    .vitals {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 32px;
+    }
+    .vital {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+    .vital-lbl {
+      font-size: 12px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+    .vital-val {
+      font-family: var(--serif);
+      font-weight: 400; font-size: 36px;
+      line-height: 1; letter-spacing: -0.5px;
+    }
+    .vital-val.pass { color: var(--pass); }
+    .vital-val.warn { color: var(--warn); }
+    .vital-val.fail { color: var(--fail); }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 32px; }
+    .btn {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      font-family: var(--sans); font-weight: 500; font-size: 13px;
+      border-radius: 8px; cursor: pointer;
+    }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Files row */
+    .section-title {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 22px;
+      margin: 36px 0 16px;
+    }
+    .files {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-bottom: 8px;
+    }
+    .file {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid transparent;
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+    }
+    .file.pass { border-left-color: var(--pass); }
+    .file.warn { border-left-color: var(--warn); }
+    .file.fail { border-left-color: var(--fail); }
+    .file-name { font-weight: 500; font-size: 14px; }
+    .file-meta { font-size: 12px; color: var(--text-muted); font-family: var(--mono); margin-top: 6px; }
+    .file-v {
+      position: absolute; top: 14px; right: 16px;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .file-v.pass { color: var(--pass); }
+    .file-v.warn { color: var(--warn); }
+    .file-v.fail { color: var(--fail); }
+
+    /* Check groups */
+    .group {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .group-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: baseline; gap: 12px;
+      background: rgba(74,93,79,0.02);
+    }
+    .group-name {
+      font-family: var(--serif);
+      font-weight: 400; font-size: 20px;
+    }
+    .group-count { font-size: 13px; color: var(--text-muted); }
+
+    .check {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .check:last-child { border-bottom: 0; }
+    .check-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .check-name {
+      font-size: 15px; font-weight: 500;
+    }
+    .check-threshold {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .rollup {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 500;
+      padding: 4px 12px; border-radius: 999px;
+    }
+    .rollup::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .rollup.pass { color: var(--pass); background: var(--pass-bg); }
+    .rollup.warn { color: var(--warn); background: var(--warn-bg); }
+    .rollup.fail { color: var(--fail); background: var(--fail-bg); }
+
+    .per-file {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .pf {
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pf-name { font-size: 12px; color: var(--text-muted); }
+    .pf-val { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+    .pf.pass .pf-val { color: var(--pass); }
+    .pf.warn .pf-val { color: var(--warn); }
+    .pf.fail .pf-val { color: var(--fail); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a href="cars-list-b.html" class="brand">
+      <svg viewBox="0 0 260 48" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+          <rect x="3" y="14" width="22" height="20" rx="10"/>
+          <rect x="17" y="14" width="22" height="20" rx="10"/>
+        </g>
+        <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+        <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+      </svg>
+    </a>
+    <nav class="nav">
+      <a href="cars-list-b.html">Cars</a>
+      <a href="#" class="active">Sessions</a>
+      <a href="#">Checks</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div class="right">
+      <div class="userchip">
+        <span id="user-name"></span>
+        <span class="avatar" id="user-init"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="crumbs">
+      <a href="cars-list-b.html">Cars</a>
+      <span class="sep">/</span>
+      <a href="#">Bolt #88</a>
+      <span class="sep">/</span>
+      <span class="here" id="crumb-session"></span>
+    </div>
+
+    <h1 class="doc-title">Session report</h1>
+    <div class="doc-sub" id="doc-sub"></div>
+
+    <section class="identity">
+      <div class="num" id="ident-num"></div>
+      <div>
+        <h2 id="ident-name"></h2>
+        <div class="meta" id="ident-meta"></div>
+        <dl class="meta-grid">
+          <dt>Track</dt><dd id="ident-track"></dd>
+          <dt>Duration</dt><dd id="ident-duration"></dd>
+          <dt>Files</dt><dd id="ident-files"></dd>
+          <dt>Weather</dt><dd id="ident-weather"></dd>
+        </dl>
+      </div>
+      <div class="big-verdict" id="ident-verdict">Fail</div>
+    </section>
+
+    <section class="vitals">
+      <div class="vital">
+        <div class="vital-lbl">Indicators run</div>
+        <div class="vital-val" id="v-run"></div>
+      </div>
+      <div class="vital">
+        <div class="vital-lbl">Within range</div>
+        <div class="vital-val pass" id="v-pass"></div>
+      </div>
+      <div class="vital">
+        <div class="vital-lbl">Watch</div>
+        <div class="vital-val warn" id="v-warn"></div>
+      </div>
+      <div class="vital">
+        <div class="vital-lbl">Concern</div>
+        <div class="vital-val fail" id="v-fail"></div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn">Re-bucket session</button>
+      <button class="btn">Export PDF</button>
+      <button class="btn primary">Share report</button>
+    </div>
+
+    <h2 class="section-title">Files in session</h2>
+    <div class="files" id="files"></div>
+
+    <h2 class="section-title">Indicators</h2>
+    <div id="groups"></div>
+  </main>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const d = window.CROSSLINK;
+    const s = d.session;
+    document.getElementById('user-name').textContent = d.user.name;
+    document.getElementById('user-init').textContent = d.user.initials;
+
+    const fmtDate = (str) => new Date(str).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const fmtShort = (str) => new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    document.getElementById('crumb-session').textContent = `Session, ${fmtShort(s.date)}`;
+    document.getElementById('doc-sub').textContent = `${s.car.name} #${s.car.number} · ${fmtDate(s.date)}`;
+
+    document.getElementById('ident-num').textContent = `#${s.car.number}`;
+    document.getElementById('ident-name').textContent = s.car.name;
+    document.getElementById('ident-meta').textContent = `${s.car.carType} · driver ${s.car.driver}`;
+    document.getElementById('ident-track').textContent = s.track;
+    document.getElementById('ident-duration').textContent = s.duration;
+    document.getElementById('ident-files').textContent = `${s.files.length} stints`;
+    document.getElementById('ident-weather').textContent = s.weather;
+
+    const vEl = document.getElementById('ident-verdict');
+    vEl.classList.add(s.rollupVerdict);
+    vEl.textContent = s.rollupVerdict.charAt(0).toUpperCase() + s.rollupVerdict.slice(1);
+
+    document.getElementById('v-run').textContent = s.summary.checksRun;
+    document.getElementById('v-pass').textContent = s.summary.passes;
+    document.getElementById('v-warn').textContent = s.summary.warns;
+    document.getElementById('v-fail').textContent = s.summary.fails;
+
+    document.getElementById('files').innerHTML = s.files.map(f => `
+      <div class="file ${f.verdict}">
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta">${f.start} · ${f.duration} · ${f.samples}</div>
+        <div class="file-v ${f.verdict}">${f.verdict}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('groups').innerHTML = s.checkGroups.map(g => `
+      <section class="group">
+        <header class="group-head">
+          <h3 class="group-name">${g.name}</h3>
+          <span class="group-count">${g.checks.length} indicators</span>
+        </header>
+        ${g.checks.map(c => `
+          <div class="check">
+            <div class="check-head">
+              <div class="check-name">${c.name}</div>
+              <span class="rollup ${c.rollup}">${c.rollup}</span>
+            </div>
+            <div class="check-threshold">${c.threshold}</div>
+            <div class="per-file">
+              ${s.files.map(f => {
+                const pf = c.perFile[f.id];
+                return `<div class="pf ${pf.verdict}">
+                  <span class="pf-name">${f.name.split('-')[0]}</span>
+                  <span class="pf-val">${pf.observed}</span>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </section>
+    `).join('');
+  </script>
+</body>
+</html>
