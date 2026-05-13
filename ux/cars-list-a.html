@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fleet · Crosslink Motorsports — Variant A (Paddock)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d;
+      --surface: #14161a;
+      --surface-2: #1c1f24;
+      --border: #262a31;
+      --border-strong: #3a3f48;
+      --text: #ebe9e3;
+      --text-muted: #8a8d94;
+      --text-dim: #5a5d63;
+      --accent: #f59e0b;
+      --pass: #22c55e;
+      --warn: #f59e0b;
+      --fail: #ef4444;
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, 'Fira Code', monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        linear-gradient(180deg, rgba(245,158,11,0.04) 0, transparent 240px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Top chrome */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,11,13,0.85);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--accent); }
+    .brand svg { height: 30px; width: auto; }
+    .brand .team-tag {
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-left: 1px solid var(--border-strong);
+      padding-left: 12px;
+      margin-left: 4px;
+    }
+    .nav { display: flex; gap: 4px; margin-left: auto; }
+    .nav a {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      color: var(--text-muted);
+      border-bottom: 1px solid transparent;
+    }
+    .nav a.active { color: var(--text); border-bottom-color: var(--accent); }
+    .nav a:hover { color: var(--text); }
+    .userchip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 6px 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 12px;
+    }
+    .avatar {
+      width: 26px; height: 26px;
+      background: var(--accent);
+      color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Page header */
+    .container { max-width: 1280px; margin: 0 auto; padding: 32px; }
+    .page-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 6px;
+    }
+    .page-h1 {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    .btn {
+      background: var(--accent);
+      color: #0a0b0d;
+      border: 0;
+      padding: 10px 18px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+
+    /* Stats strip */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .stat {
+      padding: 18px 20px;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: 0; }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+    .stat-value.warn { color: var(--warn); }
+    .stat-value.fail { color: var(--fail); }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Filter bar */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .chip {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .chip.active { color: var(--accent); border-color: var(--accent); }
+    .search {
+      margin-left: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      padding: 7px 12px;
+      width: 240px;
+    }
+
+    /* Cars table */
+    table.cars {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    table.cars thead th {
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    table.cars tbody td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.cars tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+    table.cars tbody tr:last-child td { border-bottom: 0; }
+
+    .car-num {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      width: 64px;
+    }
+    .car-name { font-weight: 600; font-size: 15px; }
+    .car-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .car-type {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .last-track { font-size: 13px; }
+    .last-date { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border: 1px solid currentColor;
+    }
+    .verdict::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+    .verdict.pass { color: var(--pass); }
+    .verdict.warn { color: var(--warn); }
+    .verdict.fail { color: var(--fail); }
+
+    .trend { display: flex; gap: 3px; align-items: center; }
+    .trend .dot {
+      width: 8px; height: 8px; border-radius: 1px;
+    }
+    .trend .dot.pass { background: var(--pass); }
+    .trend .dot.warn { background: var(--warn); }
+    .trend .dot.fail { background: var(--fail); }
+
+    .arrow { color: var(--text-dim); font-family: var(--mono); }
+    table.cars tbody tr:hover .arrow { color: var(--accent); }
+
+    /* Footer */
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 24px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+    .footer .dot { color: var(--text-dim); margin: 0 4px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a href="#" class="brand">
+      <svg viewBox="0 0 260 48" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+          <rect x="3" y="14" width="22" height="20" rx="10"/>
+          <rect x="17" y="14" width="22" height="20" rx="10"/>
+        </g>
+        <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+        <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+      </svg>
+    </a>
+    <nav class="nav">
+      <a href="#" class="active">Fleet</a>
+      <a href="#">Sessions</a>
+      <a href="#">Checks</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div class="userchip">
+      <span id="user-name"></span>
+      <span class="avatar" id="user-init"></span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head">
+      <div>
+        <p class="page-title">Crosslink Motorsports · Active fleet</p>
+        <h1 class="page-h1">Fleet</h1>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost">Import</button>
+        <button class="btn">+ Add car</button>
+      </div>
+    </div>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Active cars</div>
+        <div class="stat-value" id="stat-cars"></div>
+        <div class="stat-sub">3 types in fleet</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Sessions / 7d</div>
+        <div class="stat-value" id="stat-sessions"></div>
+        <div class="stat-sub">+3 vs prior week</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Failures / 7d</div>
+        <div class="stat-value fail" id="stat-fails"></div>
+        <div class="stat-sub">Car #88 · Road Atlanta</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Members</div>
+        <div class="stat-value" id="stat-members"></div>
+        <div class="stat-sub">2 admins</div>
+      </div>
+    </section>
+
+    <div class="filters">
+      <span class="chip active">All</span>
+      <span class="chip">Spec Miata</span>
+      <span class="chip">Radical SR3</span>
+      <span class="chip">LMP3</span>
+      <span class="chip">GT4 Cayman</span>
+      <input class="search" placeholder="Search car, driver, track…" />
+    </div>
+
+    <table class="cars">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Car</th>
+          <th>Type</th>
+          <th>Last session</th>
+          <th>Verdict</th>
+          <th>Last 7</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="cars-body"></tbody>
+    </table>
+
+    <div class="footer">
+      <span>STATUS: NOMINAL</span>
+      <span class="dot">·</span>
+      <span>5 CARS</span>
+      <span class="dot">·</span>
+      <span>12 SESSIONS / 7D</span>
+      <span class="dot">·</span>
+      <span class="fail" style="color:var(--fail);">1 FAILURE OPEN</span>
+    </div>
+  </main>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    document.getElementById('user-name').textContent = data.user.name;
+    document.getElementById('user-init').textContent = data.user.initials;
+    document.getElementById('stat-cars').textContent = data.team.activeCars.toString().padStart(2, '0');
+    document.getElementById('stat-sessions').textContent = data.team.sessionsThisWeek.toString().padStart(2, '0');
+    document.getElementById('stat-fails').textContent = data.team.failuresThisWeek.toString().padStart(2, '0');
+    document.getElementById('stat-members').textContent = data.team.membersCount.toString().padStart(2, '0');
+
+    const fmtDate = (s) => {
+      const d = new Date(s);
+      return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
+    };
+
+    const body = document.getElementById('cars-body');
+    body.innerHTML = data.cars.map(c => `
+      <tr>
+        <td class="car-num">${c.number}</td>
+        <td>
+          <div class="car-name">${c.name}</div>
+          <div class="car-meta">${c.driver} · ${c.sessionsCount} sessions</div>
+        </td>
+        <td class="car-type">${c.carType}</td>
+        <td>
+          <div class="last-track">${c.lastSessionTrack}</div>
+          <div class="last-date">${fmtDate(c.lastSessionAt)}</div>
+        </td>
+        <td><span class="verdict ${c.lastVerdict}">${c.lastVerdict}</span></td>
+        <td>
+          <div class="trend">
+            ${c.trend.map(v => `<span class="dot ${v}"></span>`).join('')}
+          </div>
+        </td>
+        <td style="text-align:right;"><span class="arrow">→</span></td>
+      </tr>
+    `).join('');
+  </script>
+</body>
+</html>
