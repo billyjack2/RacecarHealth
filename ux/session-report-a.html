@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session 2026-05-12 · Bolt #88 — Variant A (Paddock)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d;
+      --surface: #14161a;
+      --surface-2: #1c1f24;
+      --border: #262a31;
+      --border-strong: #3a3f48;
+      --text: #ebe9e3;
+      --text-muted: #8a8d94;
+      --text-dim: #5a5d63;
+      --accent: #f59e0b;
+      --pass: #22c55e;
+      --warn: #f59e0b;
+      --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        linear-gradient(180deg, rgba(245,158,11,0.04) 0, transparent 240px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Top chrome (matches cars-list-a) */
+    .topbar {
+      display: flex; align-items: center; gap: 32px;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,11,13,0.85);
+      backdrop-filter: blur(8px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--accent); }
+    .brand svg { height: 30px; width: auto; }
+    .nav { display: flex; gap: 4px; margin-left: auto; }
+    .nav a {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 14px; color: var(--text-muted);
+      border-bottom: 1px solid transparent;
+    }
+    .nav a.active { color: var(--text); border-bottom-color: var(--accent); }
+    .userchip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 6px 6px 12px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .avatar {
+      width: 26px; height: 26px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+    }
+
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px 32px 48px; }
+
+    /* Breadcrumbs */
+    .crumbs {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 18px;
+    }
+    .crumbs a { color: var(--text-muted); }
+    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
+    .crumbs .here { color: var(--text); }
+
+    /* Hero banner */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, rgba(239,68,68,0.12), transparent 50%),
+        var(--surface);
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    .hero-num {
+      font-family: var(--mono);
+      font-size: 88px;
+      font-weight: 700;
+      letter-spacing: -3px;
+      line-height: 0.9;
+      color: var(--accent);
+    }
+    .hero-meta .car-name {
+      font-size: 32px; font-weight: 700; margin: 0;
+      letter-spacing: -0.5px; text-transform: uppercase;
+    }
+    .hero-meta .car-sub {
+      color: var(--text-muted); font-family: var(--mono);
+      font-size: 13px; margin-top: 6px;
+    }
+    .hero-verdict {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 16px 24px;
+      border: 2px solid var(--fail);
+      color: var(--fail);
+      font-family: var(--mono);
+      font-weight: 700; font-size: 22px; letter-spacing: 4px;
+    }
+    .hero-verdict::before {
+      content: ''; width: 12px; height: 12px;
+      background: var(--fail); display: inline-block;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Strip below hero */
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 24px;
+    }
+    .strip > div {
+      padding: 14px 20px;
+      border-right: 1px solid var(--border);
+    }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val {
+      font-family: var(--mono); font-size: 16px; font-weight: 500;
+    }
+
+    /* Actions row */
+    .actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 8px 14px;
+      font-family: var(--sans);
+      font-weight: 600; font-size: 11px;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer;
+    }
+    .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
+
+    /* Section heading */
+    .section-h {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted); margin: 32px 0 12px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-h::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Files row */
+    .files {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .file-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px 18px;
+      position: relative;
+    }
+    .file-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .file-card.pass::before { background: var(--pass); }
+    .file-card.warn::before { background: var(--warn); }
+    .file-card.fail::before { background: var(--fail); }
+    .file-name { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+    .file-meta {
+      font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+      margin-top: 6px; letter-spacing: 0.5px;
+    }
+    .file-verdict {
+      position: absolute; top: 14px; right: 16px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; font-weight: 700;
+    }
+    .file-verdict.pass { color: var(--pass); }
+    .file-verdict.warn { color: var(--warn); }
+    .file-verdict.fail { color: var(--fail); }
+
+    /* Summary cells */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .summary > div {
+      padding: 18px 20px;
+      border-right: 1px solid var(--border);
+    }
+    .summary > div:last-child { border-right: 0; }
+    .sum-num { font-family: var(--mono); font-size: 28px; font-weight: 600; letter-spacing: -1px; }
+    .sum-num.pass { color: var(--pass); }
+    .sum-num.warn { color: var(--warn); }
+    .sum-num.fail { color: var(--fail); }
+    .sum-lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-top: 6px;
+    }
+
+    /* Check groups */
+    .group { border: 1px solid var(--border); background: var(--surface); margin-bottom: 16px; }
+    .group-head {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .group-name {
+      font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+      font-weight: 700;
+    }
+    .group-count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1px;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .check:last-child { border-bottom: 0; }
+    .check-name {
+      font-size: 14px; font-weight: 600; margin-bottom: 6px;
+    }
+    .check-threshold {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); letter-spacing: 0.3px;
+    }
+    .check-results {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .file-result {
+      flex: 1;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .file-result.pass { border-color: rgba(34,197,94,0.4); }
+    .file-result.warn { border-color: rgba(245,158,11,0.5); }
+    .file-result.fail { border-color: rgba(239,68,68,0.5); }
+    .file-result .fr-id {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+      color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .file-result .fr-val {
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+    }
+    .file-result.pass .fr-val { color: var(--pass); }
+    .file-result.warn .fr-val { color: var(--warn); }
+    .file-result.fail .fr-val { color: var(--fail); }
+
+    .rollup {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; font-weight: 700;
+      padding: 4px 10px;
+      border: 1px solid currentColor;
+      margin-left: 12px;
+    }
+    .rollup.pass { color: var(--pass); }
+    .rollup.warn { color: var(--warn); }
+    .rollup.fail { color: var(--fail); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a href="cars-list-a.html" class="brand">
+      <svg viewBox="0 0 260 48" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+          <rect x="3" y="14" width="22" height="20" rx="10"/>
+          <rect x="17" y="14" width="22" height="20" rx="10"/>
+        </g>
+        <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+        <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+      </svg>
+    </a>
+    <nav class="nav">
+      <a href="cars-list-a.html">Fleet</a>
+      <a href="#" class="active">Sessions</a>
+      <a href="#">Checks</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div class="userchip">
+      <span id="user-name"></span>
+      <span class="avatar" id="user-init"></span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="crumbs">
+      <a href="cars-list-a.html">Fleet</a>
+      <span class="sep">/</span>
+      <a href="#">#88 Bolt</a>
+      <span class="sep">/</span>
+      <span class="here" id="crumb-session"></span>
+    </div>
+
+    <section class="hero">
+      <div class="hero-num" id="hero-num"></div>
+      <div class="hero-meta">
+        <h1 class="car-name" id="hero-name"></h1>
+        <div class="car-sub" id="hero-sub"></div>
+      </div>
+      <div class="hero-verdict" id="hero-verdict">FAIL</div>
+    </section>
+
+    <section class="strip">
+      <div><div class="lbl">Track</div><div class="val" id="strip-track"></div></div>
+      <div><div class="lbl">Duration</div><div class="val" id="strip-duration"></div></div>
+      <div><div class="lbl">Files</div><div class="val" id="strip-files"></div></div>
+      <div><div class="lbl">Weather</div><div class="val" id="strip-weather"></div></div>
+    </section>
+
+    <div class="actions">
+      <button class="btn">Re-bucket session</button>
+      <button class="btn">Export PDF</button>
+      <button class="btn primary">Share report</button>
+    </div>
+
+    <div class="section-h">Files in session</div>
+    <div class="files" id="files-grid"></div>
+
+    <div class="section-h">Summary</div>
+    <section class="summary">
+      <div>
+        <div class="sum-num" id="sum-checks"></div>
+        <div class="sum-lbl">Checks run</div>
+      </div>
+      <div>
+        <div class="sum-num pass" id="sum-passes"></div>
+        <div class="sum-lbl">Passing</div>
+      </div>
+      <div>
+        <div class="sum-num warn" id="sum-warns"></div>
+        <div class="sum-lbl">Warnings</div>
+      </div>
+      <div>
+        <div class="sum-num fail" id="sum-fails"></div>
+        <div class="sum-lbl">Failures</div>
+      </div>
+    </section>
+
+    <div class="section-h">Health checks</div>
+    <div id="groups"></div>
+  </main>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const d = window.CROSSLINK;
+    const s = d.session;
+    document.getElementById('user-name').textContent = d.user.name;
+    document.getElementById('user-init').textContent = d.user.initials;
+
+    const fmtDate = (str) => new Date(str).toLocaleDateString('en-US', { month:'short', day:'2-digit', year:'numeric' }).toUpperCase();
+
+    document.getElementById('crumb-session').textContent = `Session ${s.date}`;
+    document.getElementById('hero-num').textContent = `#${s.car.number}`;
+    document.getElementById('hero-name').textContent = s.car.name;
+    document.getElementById('hero-sub').textContent = `${s.car.carType} · ${s.car.driver} · ${fmtDate(s.date)}`;
+    document.getElementById('hero-verdict').textContent = s.rollupVerdict.toUpperCase();
+
+    document.getElementById('strip-track').textContent = s.track;
+    document.getElementById('strip-duration').textContent = s.duration;
+    document.getElementById('strip-files').textContent = `${s.files.length} stints`;
+    document.getElementById('strip-weather').textContent = s.weather;
+
+    document.getElementById('files-grid').innerHTML = s.files.map(f => `
+      <div class="file-card ${f.verdict}">
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta">${f.start} · ${f.duration} · ${f.samples} samples</div>
+        <div class="file-verdict ${f.verdict}">${f.verdict}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('sum-checks').textContent = s.summary.checksRun;
+    document.getElementById('sum-passes').textContent = s.summary.passes;
+    document.getElementById('sum-warns').textContent = s.summary.warns;
+    document.getElementById('sum-fails').textContent = s.summary.fails;
+
+    document.getElementById('groups').innerHTML = s.checkGroups.map(g => `
+      <section class="group">
+        <header class="group-head">
+          <div class="group-name">${g.name}</div>
+          <div class="group-count">${g.checks.length} checks</div>
+        </header>
+        ${g.checks.map(c => `
+          <div class="check">
+            <div>
+              <div class="check-name">
+                ${c.name}
+                <span class="rollup ${c.rollup}">${c.rollup}</span>
+              </div>
+              <div class="check-threshold">${c.threshold}</div>
+            </div>
+            <div class="check-results">
+              ${s.files.map(f => {
+                const pf = c.perFile[f.id];
+                return `<div class="file-result ${pf.verdict}">
+                  <div class="fr-id">${f.name.split('-')[0]}</div>
+                  <div class="fr-val">${pf.observed}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </section>
+    `).join('');
+  </script>
+</body>
+</html>
