@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fleet · Crosslink Motorsports — Variant D2 (event card grid)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d;
+      --surface: #14161a;
+      --surface-2: #1c1f24;
+      --surface-3: #22262c;
+      --border: #262a31;
+      --border-strong: #3a3f48;
+      --text: #ebe9e3;
+      --text-muted: #8a8d94;
+      --text-dim: #5a5d63;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245,158,11,0.16);
+      --pass: #22c55e;
+      --warn: #f59e0b;
+      --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 14px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+    .sidebar {
+      background: rgba(10,11,13,0.92);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px 16px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
+    .brand svg { height: 28px; }
+    .nav { display: flex; flex-direction: column; gap: 1px; }
+    .nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 10px;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+    .nav a .ico {
+      display: inline-grid; place-items: center;
+      width: 14px; height: 14px;
+      font-family: var(--mono); font-size: 13px;
+    }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+    .nav-section {
+      margin-top: 18px; padding: 0 10px 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .user-foot {
+      margin-top: auto; padding: 12px 8px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+    }
+    .user-foot .who { font-size: 12px; }
+    .user-foot .role {
+      color: var(--text-muted); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+
+    .main { padding: 28px 36px 60px; max-width: 1280px; }
+
+    .page-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted); margin: 0 0 6px;
+    }
+    .page-h1 {
+      font-size: 36px; font-weight: 700;
+      letter-spacing: -0.5px; margin: 0;
+      text-transform: uppercase;
+    }
+    .head-actions { display: flex; gap: 8px; }
+    .btn {
+      background: var(--accent); color: #0a0b0d;
+      border: 0; padding: 9px 16px;
+      font-weight: 600; font-size: 11px;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: filter 0.12s;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+    .btn-ghost:hover { background: var(--surface); }
+
+    /* Tabs (D2 introduces a Cars/Events toggle since events are now first-class) */
+    .tabs {
+      display: flex; gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 10px 18px;
+      font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; font-weight: 600;
+      color: var(--text-muted);
+      background: transparent; border: 0;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      margin-bottom: -1px;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab .ct {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-left: 6px;
+    }
+    .tab.active .ct { color: var(--accent); }
+
+    /* Stats */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .stat { padding: 16px 20px; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: 0; }
+    .stat-lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 8px;
+    }
+    .stat-val {
+      font-family: var(--mono); font-size: 26px;
+      font-weight: 500; letter-spacing: -0.5px;
+    }
+    .stat-val.fail { color: var(--fail); }
+    .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer; background: transparent;
+      transition: all 0.12s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--border-strong); }
+    .chip.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .chip .ct {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-left: 6px;
+    }
+    .chip.active .ct { color: var(--accent); }
+    .search-wrap { margin-left: auto; position: relative; }
+    .search {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans); font-size: 13px;
+      padding: 8px 14px 8px 32px;
+      width: 280px;
+    }
+    .search:focus { outline: none; border-color: var(--accent); }
+    .search-ico {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim);
+      font-family: var(--mono); font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* Card grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px 24px 20px;
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.12s, transform 0.12s, background 0.12s;
+    }
+    .card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: transparent;
+      transition: background 0.12s;
+    }
+    .card.pass::before { background: var(--pass); }
+    .card.warn::before { background: var(--warn); }
+    .card.fail::before { background: var(--fail); }
+    .card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-2);
+      transform: translateY(-1px);
+    }
+    .card-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 16px;
+    }
+    .car-num {
+      font-family: var(--mono);
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -2px;
+      line-height: 0.85;
+    }
+    .verdict {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid currentColor;
+    }
+    .verdict::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px;
+      background: currentColor; border-radius: 50%;
+    }
+    .verdict.pass { color: var(--pass); }
+    .verdict.warn { color: var(--warn); }
+    .verdict.fail { color: var(--fail); }
+
+    .car-name {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+      margin: 0 0 4px;
+    }
+    .car-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0 14px;
+    }
+    .last-event-lbl {
+      font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .last-event-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+    }
+    .event-track {
+      font-size: 14px; font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .event-dates {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .event-stints {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .event-stints .ct { color: var(--text); font-weight: 500; }
+
+    .trend-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 18px;
+    }
+    .trend-lbl {
+      font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .trend {
+      display: flex; gap: 4px; align-items: center;
+      position: relative;
+    }
+    .trend .dot {
+      width: 10px; height: 10px; border-radius: 1px;
+    }
+    .trend .dot.pass { background: var(--pass); }
+    .trend .dot.warn { background: var(--warn); }
+    .trend .dot.fail { background: var(--fail); }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 80px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      border: 1px dashed var(--border);
+    }
+    .empty .head {
+      font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .empty .clear {
+      margin-top: 16px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 8px 16px;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .footer {
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 20px;
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .footer .blink::before {
+      content: '●';
+      color: var(--pass);
+      margin-right: 6px;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-3);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      pointer-events: none; z-index: 200;
+      font-family: var(--mono);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="cars-list-d.html" class="brand" aria-label="Crosslink Motorsports — fleet">
+        <svg viewBox="0 0 260 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <rect x="3" y="14" width="22" height="20" rx="10"/>
+            <rect x="17" y="14" width="22" height="20" rx="10"/>
+          </g>
+          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+        </svg>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#" class="active" data-nav="fleet"><span class="ico">▸</span> Fleet</a>
+        <a href="#" data-nav="events"><span class="ico">◈</span> Events</a>
+        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
+        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
+      </nav>
+      <div class="nav-section">Configure</div>
+      <nav class="nav" aria-label="Configure">
+        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
+        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
+        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
+        <a href="#" data-nav="settings"><span class="ico">⚙</span> Settings</a>
+      </nav>
+      <div class="user-foot">
+        <span class="avatar" id="user-init"></span>
+        <div>
+          <div class="who" id="user-name"></div>
+          <div class="role" id="user-role"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <p class="page-title">Crosslink Motorsports · Active fleet</p>
+          <h1 class="page-h1">Fleet</h1>
+        </div>
+        <div class="head-actions">
+          <button class="btn btn-ghost" id="btn-import">Import CSV</button>
+          <button class="btn" id="btn-add">+ Add car</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" role="tab">Cars <span class="ct" id="tab-cars-ct"></span></button>
+        <button class="tab" role="tab">Events <span class="ct" id="tab-events-ct"></span></button>
+        <button class="tab" role="tab">Drivers <span class="ct">4</span></button>
+      </div>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-lbl">Active cars</div>
+          <div class="stat-val" id="stat-cars"></div>
+          <div class="stat-sub">3 types in fleet</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Events / 30d</div>
+          <div class="stat-val" id="stat-events"></div>
+          <div class="stat-sub">5 tracks visited</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Sessions / 7d</div>
+          <div class="stat-val" id="stat-sessions"></div>
+          <div class="stat-sub">+3 vs prior week</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Failures / 7d</div>
+          <div class="stat-val fail" id="stat-fails"></div>
+          <div class="stat-sub">#88 Bolt · Road Atlanta</div>
+        </div>
+      </section>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter cars">
+        <button class="chip active" data-filter="all">All <span class="ct" id="ct-all">5</span></button>
+        <button class="chip" data-filter="Spec Miata">Spec Miata <span class="ct">2</span></button>
+        <button class="chip" data-filter="Radical SR3">Radical SR3 <span class="ct">1</span></button>
+        <button class="chip" data-filter="LMP3">LMP3 <span class="ct">1</span></button>
+        <button class="chip" data-filter="GT4 Cayman">GT4 Cayman <span class="ct">1</span></button>
+        <div class="search-wrap">
+          <span class="search-ico">⌕</span>
+          <input class="search" id="search" placeholder="Search car, driver, track…" aria-label="Search" />
+        </div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="footer">
+        <span class="blink">Status nominal</span>
+        <span>5 cars</span>
+        <span>3 events / 7d</span>
+        <span style="color:var(--fail);">1 failure open</span>
+        <span style="margin-left:auto;">Last sync 14:08 UTC</span>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    $('user-name').textContent = data.user.name;
+    $('user-init').textContent = data.user.initials;
+    $('user-role').textContent = data.user.role;
+    $('stat-cars').textContent = String(data.team.activeCars).padStart(2, '0');
+    $('stat-events').textContent = data.events.length.toString().padStart(2, '0');
+    $('stat-sessions').textContent = String(data.team.sessionsThisWeek).padStart(2, '0');
+    $('stat-fails').textContent = String(data.team.failuresThisWeek).padStart(2, '0');
+    $('tab-cars-ct').textContent = data.cars.length;
+    $('tab-events-ct').textContent = data.events.length;
+
+    document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+      const t = chip.dataset.filter;
+      const ct = chip.querySelector('.ct');
+      if (!ct) return;
+      ct.textContent = t === 'all' ? data.cars.length : data.cars.filter(c => c.carType === t).length;
+    });
+
+    const state = { filter: 'all', query: '' };
+
+    const fmtDateRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const sameDay = start === end;
+      const opts = { month: 'short', day: 'numeric' };
+      return sameDay
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', opts).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric' })}`;
+    };
+
+    function applyFilter(rows) {
+      const q = state.query.trim().toLowerCase();
+      return rows.filter(c => {
+        if (state.filter !== 'all' && c.carType !== state.filter) return false;
+        if (!q) return true;
+        return (
+          c.name.toLowerCase().includes(q) ||
+          c.number.toLowerCase().includes(q) ||
+          c.driver.toLowerCase().includes(q) ||
+          c.carType.toLowerCase().includes(q) ||
+          c.lastEvent.track.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function render() {
+      const rows = applyFilter(data.cars);
+      const grid = $('grid');
+      if (rows.length === 0) {
+        grid.innerHTML = `
+          <div class="empty">
+            <div class="head">No matches</div>
+            <div>Try a different filter or search.</div>
+            <button class="clear" id="clear-filters">Clear filters</button>
+          </div>`;
+        $('clear-filters').addEventListener('click', clearFilters);
+        return;
+      }
+
+      grid.innerHTML = rows.map(c => `
+        <article class="card ${c.lastEvent.verdict}" tabindex="0" data-id="${c.id}">
+          <div class="card-head">
+            <div class="car-num">${c.number}</div>
+            <span class="verdict ${c.lastEvent.verdict}">${c.lastEvent.verdict}</span>
+          </div>
+          <h3 class="car-name">${c.name}</h3>
+          <div class="car-meta">${c.carType.toUpperCase()} · ${c.driver}</div>
+
+          <div class="divider"></div>
+
+          <div class="last-event-lbl">Last event</div>
+          <div class="last-event-row">
+            <div>
+              <div class="event-track">${c.lastEvent.track}</div>
+              <div class="event-dates">${fmtDateRange(c.lastEvent.startDate, c.lastEvent.endDate)}</div>
+            </div>
+            <div class="event-stints"><span class="ct">${c.lastEvent.sessionsCount}</span> stints</div>
+          </div>
+
+          <div class="trend-row">
+            <span class="trend-lbl">Last ${c.eventTrend.length} events</span>
+            <div class="trend">
+              ${c.eventTrend.map(v => `<span class="dot ${v}"></span>`).join('')}
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function clearFilters() {
+      state.filter = 'all';
+      state.query = '';
+      $('search').value = '';
+      document.querySelectorAll('.chip[data-filter]').forEach(c =>
+        c.classList.toggle('active', c.dataset.filter === 'all')
+      );
+      render();
+    }
+
+    document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        state.filter = chip.dataset.filter;
+        render();
+      });
+    });
+
+    $('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+
+    document.addEventListener('click', (e) => {
+      const card = e.target.closest('.card[data-id]');
+      if (card) {
+        const car = data.cars.find(c => c.id === card.dataset.id);
+        toast(`Would open ${car.name} #${car.number}`);
+      }
+    });
+
+    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (a.dataset.nav === 'fleet') return;
+        toast(`${a.textContent.trim()} — coming next`);
+      });
+    });
+
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        const label = t.textContent.trim().split(' ')[0];
+        if (label === 'Cars') return;
+        toast(`${label} tab — coming next`);
+      });
+    });
+
+    $('btn-add').addEventListener('click', () => toast('Add car — would open wizard'));
+    $('btn-import').addEventListener('click', () => toast('Import CSV — would open dropzone'));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    render();
+  </script>
+</body>
+</html>
