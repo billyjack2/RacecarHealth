@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Events · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
+      --border: #262a31; --border-strong: #3a3f48;
+      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
+      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
+      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 14px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+    /* Sidebar (shared) */
+    .sidebar {
+      background: rgba(10,11,13,0.92);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px 16px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
+    .brand svg { height: 28px; }
+    .nav { display: flex; flex-direction: column; gap: 1px; }
+    .nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 10px;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+    .nav-section {
+      margin-top: 18px; padding: 0 10px 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .user-foot {
+      margin-top: auto; padding: 12px 8px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+    }
+    .user-foot .who { font-size: 12px; }
+    .user-foot .role {
+      color: var(--text-muted); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+
+    .main { padding: 28px 36px 60px; max-width: 1320px; }
+
+    .page-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted); margin: 0 0 6px;
+    }
+    .page-h1 {
+      font-size: 36px; font-weight: 700;
+      letter-spacing: -0.5px; margin: 0;
+      text-transform: uppercase;
+    }
+    .head-actions { display: flex; gap: 8px; }
+    .btn {
+      background: var(--accent); color: #0a0b0d;
+      border: 0; padding: 9px 16px;
+      font-weight: 600; font-size: 11px;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: filter 0.12s;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+    .btn-ghost:hover { background: var(--surface); }
+
+    /* Stats */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .stat { padding: 16px 20px; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: 0; }
+    .stat-lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 8px;
+    }
+    .stat-val {
+      font-family: var(--mono); font-size: 26px;
+      font-weight: 500; letter-spacing: -0.5px;
+    }
+    .stat-val.fail { color: var(--fail); }
+    .stat-val.warn { color: var(--warn); }
+    .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer; background: transparent;
+      transition: all 0.12s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--border-strong); }
+    .chip.active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+    .chip .ct { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-left: 6px; }
+    .chip.active .ct { color: var(--accent); }
+    .search-wrap { margin-left: auto; position: relative; }
+    .search {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans); font-size: 13px;
+      padding: 8px 14px 8px 32px;
+      width: 280px;
+    }
+    .search:focus { outline: none; border-color: var(--accent); }
+    .search-ico {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim);
+      font-family: var(--mono); font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* Table */
+    .table-wrap { border: 1px solid var(--border); background: var(--surface); }
+    table.events { width: 100%; border-collapse: collapse; }
+    table.events thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      user-select: none;
+    }
+    th.sortable { cursor: pointer; transition: color 0.12s; }
+    th.sortable:hover { color: var(--text-muted); }
+    th.sortable .arrow {
+      display: inline-block; margin-left: 4px;
+      font-family: var(--mono); opacity: 0;
+      transition: opacity 0.12s;
+    }
+    th.sortable.sorted { color: var(--accent); }
+    th.sortable.sorted .arrow { opacity: 1; }
+    table.events tbody td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.events tbody tr { transition: background 0.08s; }
+    table.events tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+    table.events tbody tr:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+    table.events tbody tr:last-child td { border-bottom: 0; }
+
+    .ev-track {
+      font-size: 15px; font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    .ev-name {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .ev-dates {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text); letter-spacing: 0.5px;
+    }
+    .ev-dates .age {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .ev-kind {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      display: inline-block;
+    }
+    .ev-cars {
+      display: flex; gap: 6px; align-items: center;
+      flex-wrap: wrap;
+    }
+    .ev-cars .pill {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 3px 8px;
+      letter-spacing: 0.5px;
+    }
+    .ev-count {
+      font-family: var(--mono);
+      font-size: 16px; font-weight: 500;
+      color: var(--text);
+    }
+    .ev-count-sub {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .verdict {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid currentColor;
+    }
+    .verdict::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px;
+      background: currentColor; border-radius: 50%;
+    }
+    .verdict.pass { color: var(--pass); }
+    .verdict.warn { color: var(--warn); }
+    .verdict.fail { color: var(--fail); }
+
+    .notable {
+      font-size: 12px; color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 280px;
+      padding-left: 10px;
+      border-left: 2px solid var(--border-strong);
+    }
+    .notable.fail { border-left-color: var(--fail); color: var(--text); }
+    .notable.warn { border-left-color: var(--warn); }
+
+    .arrow-end { color: var(--text-dim); font-family: var(--mono); transition: color 0.12s, transform 0.12s; }
+
+    /* Empty / footer (shared) */
+    .empty { padding: 80px 24px; text-align: center; color: var(--text-muted); }
+    .empty .head { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+    .empty .clear {
+      margin-top: 16px; background: transparent; color: var(--accent);
+      border: 1px solid var(--accent); padding: 8px 16px;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer;
+    }
+    .footer {
+      margin-top: 24px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 20px;
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .footer .blink::before {
+      content: '●'; color: var(--pass);
+      margin-right: 6px;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-3);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      pointer-events: none; z-index: 200;
+      font-family: var(--mono);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
+        <svg viewBox="0 0 260 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <rect x="3" y="14" width="22" height="20" rx="10"/>
+            <rect x="17" y="14" width="22" height="20" rx="10"/>
+          </g>
+          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+        </svg>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="cars-list-d-final.html"><span class="ico">▸</span> Fleet</a>
+        <a href="events-list.html" class="active"><span class="ico">◈</span> Events</a>
+        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
+        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
+      </nav>
+      <div class="nav-section">Configure</div>
+      <nav class="nav" aria-label="Configure">
+        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
+        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
+        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
+        <a href="#" data-nav="settings"><span class="ico">⚙</span> Settings</a>
+      </nav>
+      <div class="user-foot">
+        <span class="avatar" id="user-init"></span>
+        <div>
+          <div class="who" id="user-name"></div>
+          <div class="role" id="user-role"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <p class="page-title">Crosslink Motorsports · Track activity</p>
+          <h1 class="page-h1">Events</h1>
+        </div>
+        <div class="head-actions">
+          <button class="btn btn-ghost" id="btn-import">Import CSV</button>
+          <button class="btn" id="btn-new">+ New event</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-lbl">Events / 30d</div>
+          <div class="stat-val" id="stat-events"></div>
+          <div class="stat-sub">5 tracks visited</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Cars on track / 30d</div>
+          <div class="stat-val" id="stat-cars"></div>
+          <div class="stat-sub">across all events</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Stints / 30d</div>
+          <div class="stat-val" id="stat-stints"></div>
+          <div class="stat-sub">avg 4 per event</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Events with failure</div>
+          <div class="stat-val fail" id="stat-fails"></div>
+          <div class="stat-sub">1 of 6 events</div>
+        </div>
+      </section>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter events">
+        <button class="chip active" data-filter="all">All <span class="ct" id="ct-all"></span></button>
+        <button class="chip" data-filter="Race weekend">Race weekend <span class="ct" id="ct-race"></span></button>
+        <button class="chip" data-filter="Test day">Test day <span class="ct" id="ct-test"></span></button>
+        <button class="chip" data-filter="fail">With failure <span class="ct" id="ct-fail"></span></button>
+        <div class="search-wrap">
+          <span class="search-ico">⌕</span>
+          <input class="search" id="search" placeholder="Search track, event…" aria-label="Search" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="events" aria-label="Events list">
+          <thead>
+            <tr>
+              <th class="sortable sorted" data-sort="date">Event <span class="arrow">↓</span></th>
+              <th>Dates</th>
+              <th>Kind</th>
+              <th>Cars</th>
+              <th class="sortable" data-sort="sessions" style="text-align:right;">Stints <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="verdict">Verdict <span class="arrow">↓</span></th>
+              <th>Notable</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-body"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none;">
+          <div class="head">No matches</div>
+          <div>Try a different filter or search.</div>
+          <button class="clear" id="clear-filters">Clear filters</button>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span class="blink">Status nominal</span>
+        <span id="footer-summary"></span>
+        <span style="color:var(--fail);">1 event with failure</span>
+        <span style="margin-left:auto;">Last sync 14:08 UTC</span>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    // Defensive: stub events from cars if missing
+    if (!data.events || data.events.length === 0) {
+      data.events = data.cars.map(c => ({
+        id: c.id + '_fallback', name: c.lastSessionTrack,
+        track: c.lastSessionTrack, startDate: c.lastSessionAt, endDate: c.lastSessionAt,
+        kind: 'Test day', cars: [c.id], sessionsCount: 1, verdict: c.lastVerdict,
+        notable: `#${c.number} ${c.name}`,
+      }));
+    }
+
+    $('user-name').textContent = data.user.name;
+    $('user-init').textContent = data.user.initials;
+    $('user-role').textContent = data.user.role;
+
+    const carById = Object.fromEntries(data.cars.map(c => [c.id, c]));
+
+    // Stats
+    $('stat-events').textContent = String(data.events.length).padStart(2, '0');
+    const totalCarsOnTrack = data.events.reduce((sum, ev) => sum + ev.cars.length, 0);
+    $('stat-cars').textContent = String(totalCarsOnTrack).padStart(2, '0');
+    const totalStints = data.events.reduce((sum, ev) => sum + ev.sessionsCount, 0);
+    $('stat-stints').textContent = String(totalStints).padStart(2, '0');
+    const failCount = data.events.filter(ev => ev.verdict === 'fail').length;
+    $('stat-fails').textContent = String(failCount).padStart(2, '0');
+    $('footer-summary').textContent = `${data.events.length} events · ${totalCarsOnTrack} car-attendances · ${totalStints} stints`;
+
+    // Filter counts
+    $('ct-all').textContent = data.events.length;
+    $('ct-race').textContent = data.events.filter(e => e.kind === 'Race weekend').length;
+    $('ct-test').textContent = data.events.filter(e => e.kind === 'Test day').length;
+    $('ct-fail').textContent = failCount;
+
+    // ----- State -----
+    const state = { filter: 'all', query: '', sortKey: 'date', sortDir: 'desc' };
+    const verdictRank = { fail: 3, warn: 2, pass: 1 };
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', opts).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric' })}`;
+    };
+
+    const today = new Date('2026-05-14');
+    const fmtAge = (s) => {
+      const days = Math.round((today - new Date(s)) / 86400000);
+      if (days === 0) return 'TODAY';
+      if (days === 1) return 'YESTERDAY';
+      if (days < 7) return `${days}D AGO`;
+      if (days < 30) return `${Math.round(days / 7)}W AGO`;
+      return `${Math.round(days / 30)}MO AGO`;
+    };
+
+    function applySort(rows) {
+      const key = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
+      return [...rows].sort((a, b) => {
+        let av, bv;
+        if (key === 'date') { av = new Date(a.startDate).getTime(); bv = new Date(b.startDate).getTime(); }
+        else if (key === 'sessions') { av = a.sessionsCount; bv = b.sessionsCount; }
+        else if (key === 'verdict') { av = verdictRank[a.verdict]; bv = verdictRank[b.verdict]; }
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      });
+    }
+
+    function applyFilter(rows) {
+      const q = state.query.trim().toLowerCase();
+      return rows.filter(ev => {
+        if (state.filter === 'fail' && ev.verdict !== 'fail') return false;
+        if (state.filter !== 'all' && state.filter !== 'fail' && ev.kind !== state.filter) return false;
+        if (!q) return true;
+        return (
+          ev.track.toLowerCase().includes(q) ||
+          ev.name.toLowerCase().includes(q) ||
+          ev.kind.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function render() {
+      const rows = applySort(applyFilter(data.events));
+      const body = $('events-body');
+      const empty = $('empty');
+
+      if (rows.length === 0) {
+        body.innerHTML = '';
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+
+      body.innerHTML = rows.map(ev => `
+        <tr tabindex="0" data-id="${ev.id}">
+          <td>
+            <div class="ev-track">${ev.track}</div>
+            <div class="ev-name">${ev.name.replace(ev.track + ' — ', '')}</div>
+          </td>
+          <td>
+            <div class="ev-dates">${fmtRange(ev.startDate, ev.endDate)}</div>
+            <div class="age">${fmtAge(ev.startDate)}</div>
+          </td>
+          <td><span class="ev-kind">${ev.kind}</span></td>
+          <td>
+            <div class="ev-cars">
+              ${ev.cars.map(cid => {
+                const c = carById[cid];
+                return c ? `<span class="pill">#${c.number}</span>` : '';
+              }).join('')}
+            </div>
+          </td>
+          <td style="text-align:right;">
+            <div class="ev-count">${ev.sessionsCount}</div>
+            <div class="ev-count-sub">stints</div>
+          </td>
+          <td><span class="verdict ${ev.verdict}">${ev.verdict}</span></td>
+          <td><div class="notable ${ev.verdict}">${ev.notable}</div></td>
+          <td style="text-align:right;"><span class="arrow-end">→</span></td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const k = th.dataset.sort;
+        th.classList.toggle('sorted', k === state.sortKey);
+        const arr = th.querySelector('.arrow');
+        if (arr) arr.textContent = state.sortDir === 'asc' ? '↑' : '↓';
+      });
+    }
+
+    // Filters
+    document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        state.filter = chip.dataset.filter;
+        render();
+      });
+    });
+    $('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+
+    // Sort
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.sort;
+        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        else { state.sortKey = k; state.sortDir = 'desc'; }
+        render();
+      });
+    });
+
+    // Row click → event detail
+    document.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-id]');
+      if (!tr) return;
+      const ev = data.events.find(x => x.id === tr.dataset.id);
+      toast(`Would open ${ev.track} ${fmtRange(ev.startDate, ev.endDate)}`);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const tr = e.target.closest && e.target.closest('tr[data-id]');
+      if (!tr) return;
+      const ev = data.events.find(x => x.id === tr.dataset.id);
+      toast(`Would open ${ev.track} ${fmtRange(ev.startDate, ev.endDate)}`);
+    });
+
+    $('clear-filters').addEventListener('click', () => {
+      state.filter = 'all'; state.query = '';
+      $('search').value = '';
+      document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
+      render();
+    });
+
+    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast(`${a.textContent.trim()} — coming next`);
+      });
+    });
+
+    $('btn-new').addEventListener('click', () => toast('New event — would open form'));
+    $('btn-import').addEventListener('click', () => toast('Import CSV — would open dropzone'));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+
+    render();
+  </script>
+</body>
+</html>
