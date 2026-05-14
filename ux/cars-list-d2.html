@@ -493,6 +493,23 @@
     const data = window.CROSSLINK;
     const $ = (id) => document.getElementById(id);
 
+    // Defensive: if a stale data.js cache (without events) is served, derive
+    // event-shaped fields from session-level fields so the page still renders.
+    data.events = data.events || [];
+    data.cars = data.cars.map(c => ({
+      ...c,
+      lastEvent: c.lastEvent || {
+        id: c.id + '_fallback',
+        name: c.lastSessionTrack,
+        track: c.lastSessionTrack,
+        startDate: c.lastSessionAt,
+        endDate: c.lastSessionAt,
+        sessionsCount: 1,
+        verdict: c.lastVerdict,
+      },
+      eventTrend: c.eventTrend || c.trend || [c.lastVerdict],
+    }));
+
     $('user-name').textContent = data.user.name;
     $('user-init').textContent = data.user.initials;
     $('user-role').textContent = data.user.role;
