@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Road Atlanta — SCCA Majors · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
+      --border: #262a31; --border-strong: #3a3f48;
+      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
+      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
+      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 14px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+    /* Sidebar (shared) */
+    .sidebar {
+      background: rgba(10,11,13,0.92);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px 16px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
+    .brand svg { height: 28px; }
+    .nav { display: flex; flex-direction: column; gap: 1px; }
+    .nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 10px;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+    .nav-section {
+      margin-top: 18px; padding: 0 10px 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .user-foot {
+      margin-top: auto; padding: 12px 8px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+    }
+    .user-foot .who { font-size: 12px; }
+    .user-foot .role { color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .main { padding: 24px 36px 60px; max-width: 1280px; }
+
+    /* Breadcrumbs */
+    .crumbs {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 18px;
+    }
+    .crumbs a { color: var(--text-muted); }
+    .crumbs a:hover { color: var(--text); }
+    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
+    .crumbs .here { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
+        var(--surface);
+      padding: 24px 28px;
+      margin-bottom: 0;
+    }
+    .hero-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 24px;
+    }
+    .hero-kind {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .hero-track {
+      font-size: 38px; font-weight: 700;
+      letter-spacing: -0.8px;
+      text-transform: uppercase;
+      margin: 0 0 4px;
+    }
+    .hero-name { font-size: 14px; color: var(--text-muted); }
+    .hero-dates {
+      font-family: var(--mono);
+      font-size: 14px;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+      color: var(--text);
+    }
+    .hero-dates .age {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-left: 10px;
+    }
+    .hero-verdict {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 14px 22px;
+      border: 2px solid currentColor;
+      font-family: var(--mono);
+      font-weight: 700; font-size: 18px; letter-spacing: 3px;
+    }
+    .hero-verdict::before {
+      content: ''; width: 10px; height: 10px;
+      background: currentColor; display: inline-block;
+    }
+    .hero-verdict.pass { color: var(--pass); }
+    .hero-verdict.warn { color: var(--warn); }
+    .hero-verdict.fail { color: var(--fail); }
+    .hero-verdict.fail::before { animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* Stat strip */
+    .strip {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 22px;
+    }
+    .strip > div {
+      padding: 14px 20px;
+      border-right: 1px solid var(--border);
+    }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+    }
+    .strip .val.fail { color: var(--fail); }
+    .strip .val.warn { color: var(--warn); }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
+    .btn {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 8px 14px;
+      font-family: var(--sans); font-weight: 600;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .btn:hover { background: var(--surface); }
+    .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
+    .btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
+
+    /* Section heading */
+    .section-h {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 32px 0 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-h .count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1.5px;
+    }
+
+    /* Cars at event — expandable rows */
+    .car-rows { border: 1px solid var(--border); background: var(--surface); }
+    .car-row {
+      border-bottom: 1px solid var(--border);
+    }
+    .car-row:last-child { border-bottom: 0; }
+    .car-row-head {
+      display: grid;
+      grid-template-columns: 70px 1.2fr 1fr 1.1fr 100px 110px 40px;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background 0.08s;
+    }
+    .car-row-head:hover { background: var(--surface-2); }
+    .car-row-head:focus-visible { outline-offset: -2px; }
+    .car-row.open .car-row-head { background: var(--surface-2); }
+
+    .cr-num {
+      font-family: var(--mono);
+      font-size: 28px; font-weight: 700;
+      color: var(--accent); letter-spacing: -1px;
+    }
+    .cr-name { font-size: 15px; font-weight: 600; }
+    .cr-driver { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .cr-type { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .cr-stints {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    .cr-stints .ct {
+      font-size: 16px; color: var(--text); font-weight: 500;
+      margin-right: 4px;
+    }
+
+    /* Verdict pill (shared) */
+    .verdict {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid currentColor;
+    }
+    .verdict::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px;
+      background: currentColor; border-radius: 50%;
+    }
+    .verdict.pass { color: var(--pass); }
+    .verdict.warn { color: var(--warn); }
+    .verdict.fail { color: var(--fail); }
+
+    .session-dots { display: flex; gap: 4px; align-items: center; }
+    .session-dots .dot {
+      width: 14px; height: 14px;
+      border-radius: 1px;
+    }
+    .session-dots .dot.pass { background: var(--pass); }
+    .session-dots .dot.warn { background: var(--warn); }
+    .session-dots .dot.fail { background: var(--fail); }
+
+    .chevron {
+      font-family: var(--mono);
+      color: var(--text-dim);
+      text-align: right;
+      transition: transform 0.12s, color 0.12s;
+    }
+    .car-row.open .chevron { transform: rotate(90deg); color: var(--accent); }
+
+    /* Expanded sessions */
+    .sessions {
+      display: none;
+      padding: 0 20px 18px 90px;
+      border-top: 1px dashed var(--border);
+      background: rgba(10,11,13,0.4);
+    }
+    .car-row.open .sessions { display: block; }
+
+    .session-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 90px 100px 110px 40px;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.08s;
+    }
+    .session-row:last-child { border-bottom: 0; }
+    .session-row:hover { background: var(--surface-2); }
+    .session-row:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+
+    .sess-time {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text); letter-spacing: 0.5px;
+    }
+    .sess-time .date {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .sess-name { font-size: 13px; font-weight: 500; }
+    .sess-name .file {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); margin-top: 2px;
+    }
+    .sess-duration {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted);
+    }
+    .sess-samples {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 0.5px;
+    }
+    .arrow-end { color: var(--text-dim); font-family: var(--mono); transition: color 0.12s, transform 0.12s; }
+
+    .sess-summary {
+      padding: 10px 4px 14px;
+      font-size: 12px; color: var(--text-muted);
+      display: flex; gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+    }
+    .sess-summary .sep { color: var(--text-dim); }
+    .sess-summary a { color: var(--accent); }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-3);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      pointer-events: none; z-index: 200;
+      font-family: var(--mono);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
+        <svg viewBox="0 0 260 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <rect x="3" y="14" width="22" height="20" rx="10"/>
+            <rect x="17" y="14" width="22" height="20" rx="10"/>
+          </g>
+          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+        </svg>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="cars-list-d-final.html"><span class="ico">▸</span> Fleet</a>
+        <a href="events-list.html" class="active"><span class="ico">◈</span> Events</a>
+        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
+        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
+      </nav>
+      <div class="nav-section">Configure</div>
+      <nav class="nav" aria-label="Configure">
+        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
+        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
+        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
+        <a href="#" data-nav="settings"><span class="ico">⚙</span> Settings</a>
+      </nav>
+      <div class="user-foot">
+        <span class="avatar" id="user-init"></span>
+        <div>
+          <div class="who" id="user-name"></div>
+          <div class="role" id="user-role"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="crumbs">
+        <a href="events-list.html">Events</a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-event"></span>
+      </div>
+
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-kind" id="hero-kind"></div>
+            <h1 class="hero-track" id="hero-track"></h1>
+            <div class="hero-name" id="hero-name"></div>
+            <div class="hero-dates">
+              <span id="hero-dates"></span>
+              <span class="age" id="hero-age"></span>
+            </div>
+          </div>
+          <div class="hero-verdict" id="hero-verdict">Fail</div>
+        </div>
+      </section>
+
+      <div class="strip">
+        <div>
+          <div class="lbl">Cars attended</div>
+          <div class="val" id="strip-cars"></div>
+        </div>
+        <div>
+          <div class="lbl">Stints run</div>
+          <div class="val" id="strip-stints"></div>
+        </div>
+        <div>
+          <div class="lbl">Checks evaluated</div>
+          <div class="val" id="strip-checks"></div>
+        </div>
+        <div>
+          <div class="lbl">Open concerns</div>
+          <div class="val fail" id="strip-fails"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-rebucket">Re-bucket sessions</button>
+        <button class="btn" id="btn-export">Export event report</button>
+        <button class="btn primary" id="btn-share">Share</button>
+      </div>
+
+      <div class="section-h">
+        <span>Cars at event</span>
+        <span class="count" id="cars-count"></span>
+      </div>
+
+      <div class="car-rows" id="car-rows"></div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    // Defensive fallback
+    if (!data.events || data.events.length === 0) {
+      data.events = [{
+        id: 'evt_road_atl_may', name: 'Road Atlanta — SCCA Majors',
+        track: 'Road Atlanta', startDate: '2026-05-12', endDate: '2026-05-14',
+        kind: 'Race weekend', cars: ['car_88'], sessionsCount: 3, verdict: 'fail',
+        notable: '#88 Bolt — coolant ceiling exceeded',
+      }];
+    }
+
+    // Pick the event to show. URL ?id=evt_... or fall back to the failing one for a fuller demo.
+    const params = new URLSearchParams(location.search);
+    const requestedId = params.get('id');
+    const event = (requestedId && data.events.find(e => e.id === requestedId))
+      || data.events.find(e => e.verdict === 'fail')
+      || data.events[0];
+
+    const carById = Object.fromEntries(data.cars.map(c => [c.id, c]));
+
+    $('user-name').textContent = data.user.name;
+    $('user-init').textContent = data.user.initials;
+    $('user-role').textContent = data.user.role;
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+    };
+    const today = new Date('2026-05-14');
+    const fmtAge = (s) => {
+      const days = Math.round((today - new Date(s)) / 86400000);
+      if (days === 0) return 'TODAY';
+      if (days === 1) return 'YESTERDAY';
+      if (days < 7) return `${days}D AGO`;
+      if (days < 30) return `${Math.round(days / 7)}W AGO`;
+      return `${Math.round(days / 30)}MO AGO`;
+    };
+
+    $('crumb-event').textContent = `${event.track}, ${fmtRange(event.startDate, event.endDate)}`;
+    $('hero-kind').textContent = event.kind;
+    $('hero-track').textContent = event.track;
+    $('hero-name').textContent = event.name.replace(event.track + ' — ', '');
+    $('hero-dates').textContent = fmtRange(event.startDate, event.endDate);
+    $('hero-age').textContent = fmtAge(event.startDate);
+
+    const v = $('hero-verdict');
+    v.classList.add(event.verdict);
+    v.textContent = event.verdict.toUpperCase();
+
+    // Strip stats — derive from event + use real session if it matches
+    const matchingSession = (data.session && data.session.car && data.session.track === event.track && data.session.date === event.startDate)
+      ? data.session : null;
+    $('strip-cars').textContent = String(event.cars.length).padStart(2, '0');
+    $('strip-stints').textContent = String(event.sessionsCount).padStart(2, '0');
+    $('strip-checks').textContent = matchingSession ? matchingSession.summary.checksRun : Math.round(event.sessionsCount * 2.5);
+    $('strip-fails').textContent = matchingSession ? matchingSession.summary.fails : (event.verdict === 'fail' ? '01' : '00');
+
+    $('cars-count').textContent = `${event.cars.length} ${event.cars.length === 1 ? 'car' : 'cars'} on track`;
+
+    // Build per-car rows with synthesized session list when no detail data
+    function sessionsForCarAtEvent(carId, ev) {
+      // For the demo event matching the fully-populated session, use its files as the
+      // session list (3 stints). For others, synthesize plausible stints.
+      if (ev.id === 'evt_road_atl_may' && carId === 'car_88' && data.session) {
+        return data.session.files.map((f, i) => ({
+          id: f.id, name: f.name, time: f.start, date: ev.startDate,
+          duration: f.duration, samples: f.samples, verdict: f.verdict,
+          stintNumber: i + 1,
+        }));
+      }
+      // Synthesize for other events
+      const verdicts = (() => {
+        if (ev.verdict === 'fail') return ['pass', 'warn', 'fail'].slice(0, ev.sessionsCount);
+        if (ev.verdict === 'warn') return ['pass', 'warn', 'pass', 'warn'].slice(0, ev.sessionsCount);
+        return Array(ev.sessionsCount).fill('pass');
+      })();
+      const startHours = [9, 11, 13, 15, 17];
+      return Array.from({ length: ev.sessionsCount }).map((_, i) => ({
+        id: `synthetic_${ev.id}_${carId}_${i}`,
+        name: `Stint ${i + 1}`,
+        time: `${String(startHours[i] || 9 + i).padStart(2, '0')}:14`,
+        date: ev.startDate,
+        duration: ['47m', '52m', '1h 08m', '45m', '38m'][i] || '40m',
+        samples: ['1.8M', '2.0M', '2.6M', '1.7M', '1.4M'][i] || '1.5M',
+        verdict: verdicts[i] || 'pass',
+        stintNumber: i + 1,
+      }));
+    }
+
+    function rollupVerdict(sessions) {
+      if (sessions.some(s => s.verdict === 'fail')) return 'fail';
+      if (sessions.some(s => s.verdict === 'warn')) return 'warn';
+      return 'pass';
+    }
+
+    const carsBody = $('car-rows');
+    carsBody.innerHTML = event.cars.map(carId => {
+      const car = carById[carId];
+      if (!car) return '';
+      const sessions = sessionsForCarAtEvent(carId, event);
+      const rollup = rollupVerdict(sessions);
+      return `
+        <div class="car-row" data-car="${carId}">
+          <div class="car-row-head" tabindex="0" role="button" aria-expanded="false">
+            <div class="cr-num">${car.number}</div>
+            <div>
+              <div class="cr-name">${car.name}</div>
+              <div class="cr-driver">${car.driver}</div>
+            </div>
+            <div class="cr-type">${car.carType}</div>
+            <div class="cr-stints"><span class="ct">${sessions.length}</span>stints</div>
+            <div class="session-dots" aria-label="Per-stint verdict">
+              ${sessions.map(s => `<span class="dot ${s.verdict}" title="${s.name} — ${s.verdict}"></span>`).join('')}
+            </div>
+            <div><span class="verdict ${rollup}">${rollup}</span></div>
+            <div class="chevron">▸</div>
+          </div>
+          <div class="sessions">
+            ${sessions.map(s => `
+              <div class="session-row" data-session="${s.id}" tabindex="0" role="button">
+                <div class="sess-time">
+                  ${s.time}
+                  <div class="date">stint ${s.stintNumber}</div>
+                </div>
+                <div class="sess-name">
+                  ${s.name}
+                  <div class="file">${s.id.startsWith('synthetic') ? '' : s.name}</div>
+                </div>
+                <div class="sess-duration">${s.duration}</div>
+                <div class="sess-samples">${s.samples} samples</div>
+                <div><span class="verdict ${s.verdict}">${s.verdict}</span></div>
+                <div style="text-align:right;"><span class="arrow-end">→</span></div>
+              </div>
+            `).join('')}
+            <div class="sess-summary">
+              <span>Per-(car, event) report rolls up these ${sessions.length} stints</span>
+              <span class="sep">·</span>
+              <a href="#" data-open-car-event="${carId}">Open ${car.name} #${car.number} at ${event.track} →</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Toggle expand / navigate
+    function carEventHref(carId) { return `car-event-detail.html?car=${carId}&event=${event.id}`; }
+
+    carsBody.addEventListener('click', (e) => {
+      // Stint row click → car-event detail (stint is one of many within that view)
+      const sess = e.target.closest('.session-row[data-session]');
+      if (sess) {
+        e.stopPropagation();
+        const row = sess.closest('.car-row');
+        const carId = row && row.dataset.car;
+        if (carId) location.href = carEventHref(carId);
+        return;
+      }
+      const openLink = e.target.closest('a[data-open-car-event]');
+      if (openLink) {
+        e.preventDefault();
+        location.href = carEventHref(openLink.dataset.openCarEvent);
+        return;
+      }
+      const head = e.target.closest('.car-row-head');
+      if (head) {
+        const row = head.closest('.car-row');
+        row.classList.toggle('open');
+        head.setAttribute('aria-expanded', row.classList.contains('open'));
+      }
+    });
+    carsBody.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const head = e.target.closest('.car-row-head');
+      if (head) {
+        e.preventDefault();
+        const row = head.closest('.car-row');
+        row.classList.toggle('open');
+        head.setAttribute('aria-expanded', row.classList.contains('open'));
+        return;
+      }
+      const sess = e.target.closest('.session-row[data-session]');
+      if (sess) {
+        e.preventDefault();
+        const row = sess.closest('.car-row');
+        const carId = row && row.dataset.car;
+        if (carId) location.href = carEventHref(carId);
+      }
+    });
+
+    // Open the first car by default for demo richness
+    const firstRow = carsBody.querySelector('.car-row');
+    if (firstRow) {
+      firstRow.classList.add('open');
+      firstRow.querySelector('.car-row-head').setAttribute('aria-expanded', 'true');
+    }
+
+    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast(`${a.textContent.trim()} — coming next`);
+      });
+    });
+
+    $('btn-rebucket').addEventListener('click', () => toast('Re-bucket sessions — would open dialog'));
+    $('btn-export').addEventListener('click', () => toast('Export event report — would generate PDF'));
+    $('btn-share').addEventListener('click', () => toast('Share — would copy link'));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+  </script>
+</body>
+</html>

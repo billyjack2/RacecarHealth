@@ -736,21 +736,21 @@
     });
 
     // ----- Row + dot clicks -----
-    function navigate(msg) { toast(msg); }
+    // Dot click → car-event detail for that car's referenced event.
+    // Prototype shortcut: all dots point to lastEvent. Real version would
+    // resolve each trend index to its actual event id.
     document.addEventListener('click', (e) => {
-      // Dot click first — has priority over row click
       const dot = e.target.closest('.dot[data-car]');
       if (dot) {
         e.stopPropagation();
         const car = data.cars.find(c => c.id === dot.dataset.car);
-        const idx = Number(dot.dataset.eventIdx);
-        navigate(`Would open ${car.name} #${car.number} at event ${idx + 1} of ${car.eventTrend.length}`);
+        location.href = `car-event-detail.html?car=${car.id}&event=${car.lastEvent.id}`;
         return;
       }
       const tr = e.target.closest('tr[data-id]');
       if (tr) {
         const car = data.cars.find(c => c.id === tr.dataset.id);
-        navigate(`Would open ${car.name} #${car.number} detail`);
+        location.href = `car-detail.html?id=${car.id}`;
       }
     });
 
@@ -760,14 +760,13 @@
       const dot = e.target.closest && e.target.closest('.dot[data-car]');
       if (dot) {
         const car = data.cars.find(c => c.id === dot.dataset.car);
-        const idx = Number(dot.dataset.eventIdx);
-        navigate(`Would open ${car.name} #${car.number} at event ${idx + 1} of ${car.eventTrend.length}`);
+        location.href = `car-event-detail.html?car=${car.id}&event=${car.lastEvent.id}`;
         return;
       }
       const tr = e.target.closest && e.target.closest('tr[data-id]');
       if (tr) {
         const car = data.cars.find(c => c.id === tr.dataset.id);
-        navigate(`Would open ${car.name} #${car.number} detail`);
+        location.href = `car-detail.html?id=${car.id}`;
       }
     });
 

@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>#88 Bolt · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
+      --border: #262a31; --border-strong: #3a3f48;
+      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
+      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
+      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 14px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(10,11,13,0.92);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px 16px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
+    .brand svg { height: 28px; }
+    .nav { display: flex; flex-direction: column; gap: 1px; }
+    .nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 10px;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+    .nav-section {
+      margin-top: 18px; padding: 0 10px 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .user-foot {
+      margin-top: auto; padding: 12px 8px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+    }
+    .user-foot .who { font-size: 12px; }
+    .user-foot .role { color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .main { padding: 24px 36px 60px; max-width: 1280px; }
+
+    .crumbs {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 18px;
+    }
+    .crumbs a { color: var(--text-muted); }
+    .crumbs a:hover { color: var(--text); }
+    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
+    .crumbs .here { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
+        var(--surface);
+      padding: 30px 32px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    .hero-num {
+      font-family: var(--mono);
+      font-size: 96px; font-weight: 700;
+      letter-spacing: -3px; line-height: 0.9;
+      color: var(--accent);
+    }
+    .hero-mid h1 {
+      font-size: 36px; font-weight: 700;
+      letter-spacing: -0.5px;
+      margin: 0 0 6px;
+      text-transform: uppercase;
+    }
+    .hero-mid .type {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text); letter-spacing: 0.5px;
+    }
+    .hero-mid .driver {
+      font-size: 13px; color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .hero-trend-wrap { text-align: right; }
+    .hero-trend-lbl {
+      font-size: 10px; letter-spacing: 2px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .hero-trend {
+      display: inline-flex; gap: 4px;
+      padding: 10px; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.3);
+    }
+    .hero-trend .dot {
+      width: 14px; height: 14px; border-radius: 1px;
+    }
+    .hero-trend .dot.pass { background: var(--pass); }
+    .hero-trend .dot.warn { background: var(--warn); }
+    .hero-trend .dot.fail { background: var(--fail); }
+
+    /* Strip */
+    .strip {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 24px;
+    }
+    .strip > div { padding: 14px 20px; border-right: 1px solid var(--border); }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+    }
+    .strip .val.fail { color: var(--fail); }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
+    .btn {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 8px 14px;
+      font-family: var(--sans); font-weight: 600;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .btn:hover { background: var(--surface); }
+    .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
+    .btn.danger { color: var(--fail); border-color: rgba(239,68,68,0.4); }
+    .btn.danger:hover { background: rgba(239,68,68,0.08); }
+
+    /* Section heading */
+    .section-h {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 32px 0 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-h .count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1.5px;
+    }
+
+    /* Events table for this car */
+    .table-wrap { border: 1px solid var(--border); background: var(--surface); }
+    table.events { width: 100%; border-collapse: collapse; }
+    table.events thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    table.events tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.events tbody tr { transition: background 0.08s; cursor: pointer; }
+    table.events tbody tr:hover { background: var(--surface-2); }
+    table.events tbody tr:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+    table.events tbody tr:last-child td { border-bottom: 0; }
+
+    .ev-track { font-size: 14px; font-weight: 600; }
+    .ev-name { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .ev-dates { font-family: var(--mono); font-size: 12px; }
+    .ev-age { font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+    .ev-kind {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      display: inline-block;
+    }
+    .ev-stints {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--text); font-weight: 500;
+    }
+
+    .verdict {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid currentColor;
+    }
+    .verdict::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px;
+      background: currentColor; border-radius: 50%;
+    }
+    .verdict.pass { color: var(--pass); }
+    .verdict.warn { color: var(--warn); }
+    .verdict.fail { color: var(--fail); }
+
+    .arrow-end { color: var(--text-dim); font-family: var(--mono); transition: color 0.12s, transform 0.12s; }
+
+    /* Setup card */
+    .setup-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 20px 24px;
+    }
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .setup-item .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 6px;
+    }
+    .setup-item .val {
+      font-size: 13px;
+    }
+    .setup-item .val.mono { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .empty { padding: 60px 24px; text-align: center; color: var(--text-muted); }
+    .empty .head { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-3);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      pointer-events: none; z-index: 200;
+      font-family: var(--mono);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
+        <svg viewBox="0 0 260 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <rect x="3" y="14" width="22" height="20" rx="10"/>
+            <rect x="17" y="14" width="22" height="20" rx="10"/>
+          </g>
+          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+        </svg>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="cars-list-d-final.html" class="active"><span class="ico">▸</span> Fleet</a>
+        <a href="events-list.html"><span class="ico">◈</span> Events</a>
+        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
+        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
+      </nav>
+      <div class="nav-section">Configure</div>
+      <nav class="nav" aria-label="Configure">
+        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
+        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
+        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
+        <a href="#" data-nav="settings"><span class="ico">⚙</span> Settings</a>
+      </nav>
+      <div class="user-foot">
+        <span class="avatar" id="user-init"></span>
+        <div>
+          <div class="who" id="user-name"></div>
+          <div class="role" id="user-role"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="crumbs">
+        <a href="cars-list-d-final.html">Fleet</a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-car"></span>
+      </div>
+
+      <section class="hero">
+        <div class="hero-num" id="hero-num"></div>
+        <div class="hero-mid">
+          <h1 id="hero-name"></h1>
+          <div class="type" id="hero-type"></div>
+          <div class="driver" id="hero-driver"></div>
+        </div>
+        <div class="hero-trend-wrap">
+          <div class="hero-trend-lbl">Recent event trend</div>
+          <div class="hero-trend" id="hero-trend"></div>
+        </div>
+      </section>
+
+      <div class="strip">
+        <div>
+          <div class="lbl">Events attended</div>
+          <div class="val" id="s-events"></div>
+        </div>
+        <div>
+          <div class="lbl">Stints lifetime</div>
+          <div class="val" id="s-stints"></div>
+        </div>
+        <div>
+          <div class="lbl">Recent verdict</div>
+          <div class="val" id="s-recent"></div>
+        </div>
+        <div>
+          <div class="lbl">Failures / 90d</div>
+          <div class="val fail" id="s-fails"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-edit">Edit car</button>
+        <button class="btn" id="btn-export">Export history</button>
+        <button class="btn danger" id="btn-archive">Archive</button>
+        <button class="btn primary" id="btn-upload">+ Upload session</button>
+      </div>
+
+      <div class="section-h">
+        <span>Event history</span>
+        <span class="count" id="events-count"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="events" aria-label="Events for this car">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Dates</th>
+              <th>Kind</th>
+              <th style="text-align:right;">Stints</th>
+              <th>Verdict</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-body"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none;">
+          <div class="head">No events yet</div>
+          <div>Upload a session to log this car's first event.</div>
+        </div>
+      </div>
+
+      <div class="section-h">
+        <span>Setup</span>
+      </div>
+      <div class="setup-card">
+        <div class="setup-grid">
+          <div class="setup-item">
+            <div class="lbl">Car type</div>
+            <div class="val" id="setup-type"></div>
+          </div>
+          <div class="setup-item">
+            <div class="lbl">Driver of record</div>
+            <div class="val" id="setup-driver"></div>
+          </div>
+          <div class="setup-item">
+            <div class="lbl">Channel mapping</div>
+            <div class="val mono">inherits from car type · no overrides</div>
+          </div>
+          <div class="setup-item">
+            <div class="lbl">Active checks</div>
+            <div class="val mono">8 inherited · 0 overridden</div>
+          </div>
+          <div class="setup-item">
+            <div class="lbl">First session</div>
+            <div class="val mono">2025-09-14 · Sebring Short</div>
+          </div>
+          <div class="setup-item">
+            <div class="lbl">Status</div>
+            <div class="val mono" style="color:var(--pass);">Active</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    data.events = data.events || [];
+
+    const params = new URLSearchParams(location.search);
+    const requestedId = params.get('id');
+    const car = (requestedId && data.cars.find(c => c.id === requestedId))
+      || data.cars.find(c => c.id === 'car_88')
+      || data.cars[0];
+
+    $('user-name').textContent = data.user.name;
+    $('user-init').textContent = data.user.initials;
+    $('user-role').textContent = data.user.role;
+
+    $('crumb-car').textContent = `#${car.number} ${car.name}`;
+    document.title = `#${car.number} ${car.name} · Crosslink Motorsports`;
+
+    $('hero-num').textContent = `#${car.number}`;
+    $('hero-name').textContent = car.name;
+    $('hero-type').textContent = car.carType.toUpperCase();
+    $('hero-driver').textContent = `Driver of record: ${car.driver}`;
+
+    const trend = car.eventTrend || car.trend || [];
+    $('hero-trend').innerHTML = trend.map(v => `<span class="dot ${v}" title="${v}"></span>`).join('');
+
+    // Strip
+    const carEvents = data.events.filter(ev => ev.cars.includes(car.id));
+    $('s-events').textContent = String(car.eventsCount || carEvents.length || 0).padStart(2, '0');
+    $('s-stints').textContent = String(car.sessionsCount).padStart(2, '0');
+    const recentVerdict = (trend[trend.length - 1] || car.lastVerdict || 'pass').toUpperCase();
+    const recentEl = $('s-recent');
+    recentEl.textContent = recentVerdict;
+    if (recentVerdict === 'FAIL') recentEl.style.color = 'var(--fail)';
+    else if (recentVerdict === 'WARN') recentEl.style.color = 'var(--warn)';
+    else recentEl.style.color = 'var(--pass)';
+    const fails90 = trend.filter(v => v === 'fail').length;
+    $('s-fails').textContent = String(fails90).padStart(2, '0');
+
+    $('setup-type').textContent = car.carType;
+    $('setup-driver').textContent = car.driver;
+
+    // Events table
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+    };
+    const today = new Date('2026-05-14');
+    const fmtAge = (s) => {
+      const days = Math.round((today - new Date(s)) / 86400000);
+      if (days === 0) return 'TODAY';
+      if (days === 1) return 'YESTERDAY';
+      if (days < 7) return `${days}D AGO`;
+      if (days < 30) return `${Math.round(days / 7)}W AGO`;
+      return `${Math.round(days / 30)}MO AGO`;
+    };
+
+    // Sort by date desc
+    const sortedEvents = [...carEvents].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+    $('events-count').textContent = `${sortedEvents.length} events`;
+
+    if (sortedEvents.length === 0) {
+      $('empty').style.display = '';
+    } else {
+      $('events-body').innerHTML = sortedEvents.map(ev => `
+        <tr tabindex="0" data-event="${ev.id}">
+          <td>
+            <div class="ev-track">${ev.track}</div>
+            <div class="ev-name">${ev.name.replace(ev.track + ' — ', '')}</div>
+          </td>
+          <td>
+            <div class="ev-dates">${fmtRange(ev.startDate, ev.endDate)}</div>
+            <div class="ev-age">${fmtAge(ev.startDate)}</div>
+          </td>
+          <td><span class="ev-kind">${ev.kind}</span></td>
+          <td style="text-align:right;"><span class="ev-stints">${ev.sessionsCount}</span></td>
+          <td><span class="verdict ${ev.verdict}">${ev.verdict}</span></td>
+          <td style="text-align:right;"><span class="arrow-end">→</span></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('events-body').addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-event]');
+      if (!tr) return;
+      location.href = `car-event-detail.html?car=${car.id}&event=${tr.dataset.event}`;
+    });
+    document.getElementById('events-body').addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const tr = e.target.closest && e.target.closest('tr[data-event]');
+      if (!tr) return;
+      location.href = `car-event-detail.html?car=${car.id}&event=${tr.dataset.event}`;
+    });
+
+    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast(`${a.textContent.trim()} — coming next`);
+      });
+    });
+
+    $('btn-edit').addEventListener('click', () => toast('Edit car — would open form'));
+    $('btn-export').addEventListener('click', () => toast('Export history — would generate PDF'));
+    $('btn-archive').addEventListener('click', () => toast('Archive — would confirm (reversible)'));
+    $('btn-upload').addEventListener('click', () => toast('Upload session — would open dropzone'));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+  </script>
+</body>
+</html>

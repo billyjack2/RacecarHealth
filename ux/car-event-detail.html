@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>#88 Bolt at Road Atlanta · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
+      --border: #262a31; --border-strong: #3a3f48;
+      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
+      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
+      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
+      --sans: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 14px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--sans); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(10,11,13,0.92);
+      border-right: 1px solid var(--border);
+      padding: 18px 12px 16px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      backdrop-filter: blur(8px);
+    }
+    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
+    .brand svg { height: 28px; }
+    .nav { display: flex; flex-direction: column; gap: 1px; }
+    .nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 10px;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
+    .nav a:hover { color: var(--text); background: var(--surface); }
+    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+    .nav-section {
+      margin-top: 18px; padding: 0 10px 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2px; color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .user-foot {
+      margin-top: auto; padding: 12px 8px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      background: var(--accent); color: #0a0b0d;
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+    }
+    .user-foot .who { font-size: 12px; }
+    .user-foot .role { color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .main { padding: 24px 36px 60px; max-width: 1280px; }
+
+    .crumbs {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 18px;
+    }
+    .crumbs a { color: var(--text-muted); }
+    .crumbs a:hover { color: var(--text); }
+    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
+    .crumbs .here { color: var(--text); }
+
+    /* Hero combines car + event identity */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, rgba(239,68,68,0.12), transparent 50%),
+        var(--surface);
+      padding: 26px 30px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 28px;
+      align-items: center;
+    }
+    .hero-num {
+      font-family: var(--mono);
+      font-size: 88px; font-weight: 700;
+      letter-spacing: -3px; line-height: 0.9;
+      color: var(--accent);
+    }
+    .hero-mid .car-name {
+      font-size: 32px; font-weight: 700;
+      margin: 0 0 4px;
+      letter-spacing: -0.5px; text-transform: uppercase;
+    }
+    .hero-mid .car-meta {
+      color: var(--text-muted); font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.5px;
+    }
+    .hero-mid .at {
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .hero-mid .event-track {
+      font-size: 18px; font-weight: 600;
+      margin-top: 4px;
+    }
+    .hero-mid .event-meta {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+    .hero-verdict {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 16px 24px;
+      border: 2px solid currentColor;
+      font-family: var(--mono);
+      font-weight: 700; font-size: 22px; letter-spacing: 4px;
+    }
+    .hero-verdict::before {
+      content: ''; width: 12px; height: 12px;
+      background: currentColor; display: inline-block;
+    }
+    .hero-verdict.pass { color: var(--pass); }
+    .hero-verdict.warn { color: var(--warn); }
+    .hero-verdict.fail { color: var(--fail); }
+    .hero-verdict.fail::before { animation: pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* Strip */
+    .strip {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 22px;
+    }
+    .strip > div {
+      padding: 14px 18px;
+      border-right: 1px solid var(--border);
+    }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val {
+      font-family: var(--mono); font-size: 16px; font-weight: 500;
+    }
+    .strip .val.pass { color: var(--pass); }
+    .strip .val.warn { color: var(--warn); }
+    .strip .val.fail { color: var(--fail); }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 20px; }
+    .btn {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 8px 14px;
+      font-family: var(--sans); font-weight: 600;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .btn:hover { background: var(--surface); }
+    .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
+
+    /* Section heading */
+    .section-h {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 32px 0 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-h .count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1.5px;
+    }
+
+    /* Stints */
+    .stints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stint {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px 18px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.08s, transform 0.1s;
+    }
+    .stint:hover { background: var(--surface-2); transform: translateY(-1px); }
+    .stint::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .stint.pass::before { background: var(--pass); }
+    .stint.warn::before { background: var(--warn); }
+    .stint.fail::before { background: var(--fail); }
+
+    .stint-num {
+      font-family: var(--mono);
+      font-size: 10px; letter-spacing: 2px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .stint-time {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .stint-name {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--mono);
+    }
+    .stint-meta {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+    .stint-verdict {
+      position: absolute; top: 14px; right: 16px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      font-weight: 700;
+    }
+    .stint-verdict.pass { color: var(--pass); }
+    .stint-verdict.warn { color: var(--warn); }
+    .stint-verdict.fail { color: var(--fail); }
+
+    /* Check rollup */
+    .group { border: 1px solid var(--border); background: var(--surface); margin-bottom: 14px; }
+    .group-head {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .group-name {
+      font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+      font-weight: 700;
+    }
+    .group-count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1px;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .check:last-child { border-bottom: 0; }
+    .check-name {
+      font-size: 14px; font-weight: 600; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .check-threshold {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); letter-spacing: 0.3px;
+    }
+    .rollup {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      font-weight: 700;
+      padding: 4px 10px;
+      border: 1px solid currentColor;
+    }
+    .rollup.pass { color: var(--pass); }
+    .rollup.warn { color: var(--warn); }
+    .rollup.fail { color: var(--fail); }
+
+    .check-results { display: flex; gap: 6px; align-items: center; }
+    .file-result {
+      flex: 1;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .file-result.pass { border-color: rgba(34,197,94,0.4); }
+    .file-result.warn { border-color: rgba(245,158,11,0.5); }
+    .file-result.fail { border-color: rgba(239,68,68,0.5); }
+    .file-result .fr-id {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+      color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .file-result .fr-val {
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+    }
+    .file-result.pass .fr-val { color: var(--pass); }
+    .file-result.warn .fr-val { color: var(--warn); }
+    .file-result.fail .fr-val { color: var(--fail); }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-3);
+      border: 1px solid var(--accent);
+      padding: 12px 20px;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.18s, transform 0.18s;
+      pointer-events: none; z-index: 200;
+      font-family: var(--mono);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
+        <svg viewBox="0 0 260 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <rect x="3" y="14" width="22" height="20" rx="10"/>
+            <rect x="17" y="14" width="22" height="20" rx="10"/>
+          </g>
+          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
+          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
+        </svg>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="cars-list-d-final.html"><span class="ico">▸</span> Fleet</a>
+        <a href="events-list.html" class="active"><span class="ico">◈</span> Events</a>
+        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
+        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
+      </nav>
+      <div class="nav-section">Configure</div>
+      <nav class="nav" aria-label="Configure">
+        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
+        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
+        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
+        <a href="#" data-nav="settings"><span class="ico">⚙</span> Settings</a>
+      </nav>
+      <div class="user-foot">
+        <span class="avatar" id="user-init"></span>
+        <div>
+          <div class="who" id="user-name"></div>
+          <div class="role" id="user-role"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="crumbs">
+        <a href="events-list.html">Events</a>
+        <span class="sep">/</span>
+        <a href="event-detail.html" id="crumb-event"></a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-car"></span>
+      </div>
+
+      <section class="hero">
+        <div class="hero-num" id="hero-num"></div>
+        <div class="hero-mid">
+          <h1 class="car-name" id="hero-car-name"></h1>
+          <div class="car-meta" id="hero-car-meta"></div>
+          <div class="at">at event</div>
+          <div class="event-track" id="hero-event-track"></div>
+          <div class="event-meta" id="hero-event-meta"></div>
+        </div>
+        <div class="hero-verdict" id="hero-verdict">Fail</div>
+      </section>
+
+      <div class="strip">
+        <div>
+          <div class="lbl">Stints</div>
+          <div class="val" id="s-stints"></div>
+        </div>
+        <div>
+          <div class="lbl">Checks run</div>
+          <div class="val" id="s-checks"></div>
+        </div>
+        <div>
+          <div class="lbl">Passing</div>
+          <div class="val pass" id="s-passes"></div>
+        </div>
+        <div>
+          <div class="lbl">Warnings</div>
+          <div class="val warn" id="s-warns"></div>
+        </div>
+        <div>
+          <div class="lbl">Failures</div>
+          <div class="val fail" id="s-fails"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-rebucket">Re-bucket stints</button>
+        <button class="btn" id="btn-export">Export PDF</button>
+        <button class="btn primary" id="btn-share">Share report</button>
+      </div>
+
+      <div class="section-h">
+        <span>Stints at event</span>
+        <span class="count" id="stints-count"></span>
+      </div>
+      <div class="stints" id="stints"></div>
+
+      <div class="section-h">
+        <span>Check rollup (worst-of across stints)</span>
+        <span class="count" id="checks-count"></span>
+      </div>
+      <div id="groups"></div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="fixtures/data.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    // Defensive fallback for events
+    data.events = data.events || [];
+
+    const params = new URLSearchParams(location.search);
+    const requestedCarId = params.get('car');
+    const requestedEventId = params.get('event');
+
+    // Default demo target: car #88 Bolt at Road Atlanta (the populated session)
+    const car = (requestedCarId && data.cars.find(c => c.id === requestedCarId))
+      || data.cars.find(c => c.id === 'car_88')
+      || data.cars[0];
+    const event = (requestedEventId && data.events.find(e => e.id === requestedEventId))
+      || data.events.find(e => e.id === 'evt_road_atl_may')
+      || data.events[0]
+      || {
+        id: 'evt_fallback', name: car.lastSessionTrack, track: car.lastSessionTrack,
+        startDate: car.lastSessionAt, endDate: car.lastSessionAt, kind: 'Test day',
+        cars: [car.id], sessionsCount: 1, verdict: car.lastVerdict,
+      };
+
+    $('user-name').textContent = data.user.name;
+    $('user-init').textContent = data.user.initials;
+    $('user-role').textContent = data.user.role;
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+    };
+    const fmtShortRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts)
+        : `${s.toLocaleDateString('en-US', opts)} – ${e.toLocaleDateString('en-US', { day: 'numeric' })}`;
+    };
+
+    $('crumb-event').textContent = `${event.track}, ${fmtShortRange(event.startDate, event.endDate)}`;
+    $('crumb-event').href = `event-detail.html?id=${event.id}`;
+    $('crumb-car').textContent = `#${car.number} ${car.name}`;
+
+    $('hero-num').textContent = `#${car.number}`;
+    $('hero-car-name').textContent = car.name;
+    $('hero-car-meta').textContent = `${car.carType} · ${car.driver}`;
+    $('hero-event-track').textContent = event.track;
+    $('hero-event-meta').textContent = `${event.kind} · ${fmtRange(event.startDate, event.endDate)}`;
+
+    // Verdict
+    // Prefer the matching session's rollup if we have full data for it
+    const fullSession = (data.session && data.session.car && car.number === data.session.car.number) ? data.session : null;
+    const rollup = fullSession ? fullSession.rollupVerdict : event.verdict;
+    const hv = $('hero-verdict');
+    hv.classList.add(rollup);
+    hv.textContent = rollup.toUpperCase();
+
+    // Stints
+    function buildStints() {
+      if (fullSession) {
+        return fullSession.files.map((f, i) => ({
+          id: f.id, name: f.name, time: f.start, duration: f.duration,
+          samples: f.samples, verdict: f.verdict, stintNumber: i + 1,
+        }));
+      }
+      const verdicts = (() => {
+        if (event.verdict === 'fail') return ['pass', 'warn', 'fail'].slice(0, event.sessionsCount);
+        if (event.verdict === 'warn') return ['pass', 'warn', 'pass', 'warn'].slice(0, event.sessionsCount);
+        return Array(event.sessionsCount).fill('pass');
+      })();
+      const startHours = [9, 11, 13, 15, 17];
+      return Array.from({ length: event.sessionsCount }).map((_, i) => ({
+        id: `synthetic_${event.id}_${car.id}_${i}`,
+        name: `stint-${i + 1}.csv`,
+        time: `${String(startHours[i] || 9 + i).padStart(2, '0')}:14`,
+        duration: ['47m', '52m', '1h 08m', '45m', '38m'][i] || '40m',
+        samples: ['1.8M', '2.0M', '2.6M', '1.7M', '1.4M'][i] || '1.5M',
+        verdict: verdicts[i] || 'pass',
+        stintNumber: i + 1,
+      }));
+    }
+    const stints = buildStints();
+
+    // Summary
+    function buildSummary() {
+      if (fullSession) return fullSession.summary;
+      const checksRun = 8;
+      const verdictCounts = stints.reduce((acc, s) => (acc[s.verdict] = (acc[s.verdict] || 0) + 1, acc), {});
+      const fails = verdictCounts.fail ? 1 : 0;
+      const warns = (verdictCounts.warn || 0) + (event.verdict === 'warn' && !fails ? 1 : 0);
+      return { checksRun, passes: checksRun - fails - warns, warns: Math.min(warns, 3), fails };
+    }
+    const summary = buildSummary();
+
+    $('s-stints').textContent = String(stints.length).padStart(2, '0');
+    $('s-checks').textContent = String(summary.checksRun).padStart(2, '0');
+    $('s-passes').textContent = String(summary.passes).padStart(2, '0');
+    $('s-warns').textContent = String(summary.warns).padStart(2, '0');
+    $('s-fails').textContent = String(summary.fails).padStart(2, '0');
+
+    $('stints-count').textContent = `${stints.length} stints`;
+
+    $('stints').innerHTML = stints.map(s => `
+      <div class="stint ${s.verdict}" data-stint="${s.id}" tabindex="0" role="button" aria-label="Stint ${s.stintNumber} — ${s.verdict}">
+        <div class="stint-num">Stint ${s.stintNumber}</div>
+        <div class="stint-time">${s.time}</div>
+        <div class="stint-name">${s.name}</div>
+        <div class="stint-meta">${s.duration} · ${s.samples} samples</div>
+        <div class="stint-verdict ${s.verdict}">${s.verdict}</div>
+      </div>
+    `).join('');
+
+    // Check groups — use real session groups when available, else synthesize
+    function buildGroups() {
+      if (fullSession) return fullSession.checkGroups;
+      return [
+        {
+          name: 'Engine',
+          checks: [
+            { name: 'RPM peak under redline', rollup: 'pass', threshold: 'max(RPM) < 8500',
+              perFile: Object.fromEntries(stints.map((s, i) => [s.id, { verdict: 'pass', observed: '8120 rpm' }])) },
+          ],
+        },
+        {
+          name: 'Fluids',
+          checks: [
+            { name: 'Coolant under load', rollup: event.verdict, threshold: 'max(CoolantTemp) < 95°C when RPM > 4000',
+              perFile: Object.fromEntries(stints.map((s, i) => [s.id, { verdict: s.verdict, observed: ['88°C', '94°C', '102°C', '90°C'][i] || '92°C' }])) },
+          ],
+        },
+      ];
+    }
+    const groups = buildGroups();
+    $('checks-count').textContent = `${groups.reduce((a, g) => a + g.checks.length, 0)} checks · ${groups.length} groups`;
+
+    $('groups').innerHTML = groups.map(g => `
+      <section class="group">
+        <header class="group-head">
+          <div class="group-name">${g.name}</div>
+          <div class="group-count">${g.checks.length} checks</div>
+        </header>
+        ${g.checks.map(c => `
+          <div class="check">
+            <div>
+              <div class="check-name">
+                ${c.name}
+                <span class="rollup ${c.rollup}">${c.rollup}</span>
+              </div>
+              <div class="check-threshold">${c.threshold}</div>
+            </div>
+            <div class="check-results">
+              ${stints.map(s => {
+                const pf = c.perFile[s.id] || { verdict: 'pass', observed: '—' };
+                return `<div class="file-result ${pf.verdict}">
+                  <div class="fr-id">Stint ${s.stintNumber}</div>
+                  <div class="fr-val">${pf.observed}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </section>
+    `).join('');
+
+    // Stint click → toast (would open per-stint detail; v1 may not need a deeper view)
+    document.getElementById('stints').addEventListener('click', (e) => {
+      const stint = e.target.closest('.stint[data-stint]');
+      if (stint) {
+        const s = stints.find(x => x.id === stint.dataset.stint);
+        toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+      }
+    });
+    document.getElementById('stints').addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const stint = e.target.closest('.stint[data-stint]');
+      if (stint) {
+        e.preventDefault();
+        const s = stints.find(x => x.id === stint.dataset.stint);
+        toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+      }
+    });
+
+    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast(`${a.textContent.trim()} — coming next`);
+      });
+    });
+
+    $('btn-rebucket').addEventListener('click', () => toast('Re-bucket stints — would open dialog'));
+    $('btn-export').addEventListener('click', () => toast('Export PDF — would generate report'));
+    $('btn-share').addEventListener('click', () => toast('Share — would copy link'));
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+  </script>
+</body>
+</html>

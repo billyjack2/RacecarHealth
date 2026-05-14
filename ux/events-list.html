@@ -582,15 +582,13 @@
     document.addEventListener('click', (e) => {
       const tr = e.target.closest('tr[data-id]');
       if (!tr) return;
-      const ev = data.events.find(x => x.id === tr.dataset.id);
-      toast(`Would open ${ev.track} ${fmtRange(ev.startDate, ev.endDate)}`);
+      location.href = `event-detail.html?id=${tr.dataset.id}`;
     });
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       const tr = e.target.closest && e.target.closest('tr[data-id]');
       if (!tr) return;
-      const ev = data.events.find(x => x.id === tr.dataset.id);
-      toast(`Would open ${ev.track} ${fmtRange(ev.startDate, ev.endDate)}`);
+      location.href = `event-detail.html?id=${tr.dataset.id}`;
     });
 
     $('clear-filters').addEventListener('click', () => {
