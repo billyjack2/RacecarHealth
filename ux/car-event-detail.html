@@ -92,11 +92,11 @@
     .hero {
       border: 1px solid var(--border);
       background:
-        radial-gradient(circle at top right, rgba(239,68,68,0.12), transparent 50%),
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
         var(--surface);
       padding: 26px 30px;
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr;
       gap: 28px;
       align-items: center;
     }
@@ -130,23 +130,6 @@
       color: var(--text-muted); margin-top: 2px;
       letter-spacing: 0.5px;
     }
-    .hero-verdict {
-      display: inline-flex; align-items: center; gap: 12px;
-      padding: 16px 24px;
-      border: 2px solid currentColor;
-      font-family: var(--mono);
-      font-weight: 700; font-size: 22px; letter-spacing: 4px;
-    }
-    .hero-verdict::before {
-      content: ''; width: 12px; height: 12px;
-      background: currentColor; display: inline-block;
-    }
-    .hero-verdict.pass { color: var(--pass); }
-    .hero-verdict.warn { color: var(--warn); }
-    .hero-verdict.fail { color: var(--fail); }
-    .hero-verdict.fail::before { animation: pulse 1.8s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-
     /* Strip */
     .strip {
       display: grid; grid-template-columns: repeat(5, 1fr);
@@ -381,7 +364,6 @@
           <div class="event-track" id="hero-event-track"></div>
           <div class="event-meta" id="hero-event-meta"></div>
         </div>
-        <div class="hero-verdict" id="hero-verdict">Fail</div>
       </section>
 
       <div class="strip">
@@ -483,13 +465,8 @@
     $('hero-event-track').textContent = event.track;
     $('hero-event-meta').textContent = `${event.kind} · ${fmtRange(event.startDate, event.endDate)}`;
 
-    // Verdict
-    // Prefer the matching session's rollup if we have full data for it
+    // Use the fully-populated session when this view targets the car/event it covers
     const fullSession = (data.session && data.session.car && car.number === data.session.car.number) ? data.session : null;
-    const rollup = fullSession ? fullSession.rollupVerdict : event.verdict;
-    const hv = $('hero-verdict');
-    hv.classList.add(rollup);
-    hv.textContent = rollup.toUpperCase();
 
     // Stints
     function buildStints() {

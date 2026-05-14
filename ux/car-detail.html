@@ -141,7 +141,7 @@
 
     /* Strip */
     .strip {
-      display: grid; grid-template-columns: repeat(4, 1fr);
+      display: grid; grid-template-columns: repeat(2, 1fr);
       border: 1px solid var(--border);
       border-top: 0;
       background: var(--surface);
@@ -172,6 +172,80 @@
     .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
     .btn.danger { color: var(--fail); border-color: rgba(239,68,68,0.4); }
     .btn.danger:hover { background: rgba(239,68,68,0.08); }
+
+    /* Overflow menu */
+    .more-wrap { position: relative; }
+    .more-btn {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-strong);
+      width: 38px; height: 34px;
+      font-family: var(--mono); font-size: 18px;
+      cursor: pointer; padding: 0;
+      transition: background 0.12s;
+    }
+    .more-btn:hover { background: var(--surface); }
+    .more-btn.open { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+    .more-menu {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      min-width: 200px;
+      display: none;
+      z-index: 50;
+    }
+    .more-menu.open { display: block; }
+    .more-menu button {
+      display: block; width: 100%;
+      background: transparent; border: 0;
+      padding: 10px 14px; text-align: left;
+      font-family: var(--sans); font-size: 12px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text); cursor: pointer;
+    }
+    .more-menu button:hover { background: var(--surface-2); }
+    .more-menu button.danger { color: var(--fail); }
+    .more-menu button.danger:hover { background: rgba(239,68,68,0.08); }
+    .more-menu .sep {
+      height: 1px; background: var(--border); margin: 4px 0;
+    }
+
+    /* Toolbar (events table) */
+    .toolbar {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; }
+    .search {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans); font-size: 13px;
+      padding: 8px 14px 8px 32px;
+      width: 280px;
+    }
+    .search:focus { outline: none; border-color: var(--accent); }
+    .search-ico {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim);
+      font-family: var(--mono); font-size: 14px;
+      pointer-events: none;
+    }
+    .toolbar .filler { flex: 1; }
+    .toolbar .results {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1.5px;
+    }
+
+    /* Sortable headers */
+    th.sortable { cursor: pointer; transition: color 0.12s; user-select: none; }
+    th.sortable:hover { color: var(--text-muted); }
+    th.sortable .arrow {
+      display: inline-block; margin-left: 4px;
+      font-family: var(--mono); opacity: 0;
+      transition: opacity 0.12s;
+    }
+    th.sortable.sorted { color: var(--accent); }
+    th.sortable.sorted .arrow { opacity: 1; }
 
     /* Section heading */
     .section-h {
@@ -339,14 +413,6 @@
 
       <div class="strip">
         <div>
-          <div class="lbl">Events attended</div>
-          <div class="val" id="s-events"></div>
-        </div>
-        <div>
-          <div class="lbl">Stints lifetime</div>
-          <div class="val" id="s-stints"></div>
-        </div>
-        <div>
           <div class="lbl">Recent verdict</div>
           <div class="val" id="s-recent"></div>
         </div>
@@ -359,32 +425,15 @@
       <div class="actions">
         <button class="btn" id="btn-edit">Edit car</button>
         <button class="btn" id="btn-export">Export history</button>
-        <button class="btn danger" id="btn-archive">Archive</button>
         <button class="btn primary" id="btn-upload">+ Upload session</button>
-      </div>
-
-      <div class="section-h">
-        <span>Event history</span>
-        <span class="count" id="events-count"></span>
-      </div>
-
-      <div class="table-wrap">
-        <table class="events" aria-label="Events for this car">
-          <thead>
-            <tr>
-              <th>Event</th>
-              <th>Dates</th>
-              <th>Kind</th>
-              <th style="text-align:right;">Stints</th>
-              <th>Verdict</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="events-body"></tbody>
-        </table>
-        <div class="empty" id="empty" style="display:none;">
-          <div class="head">No events yet</div>
-          <div>Upload a session to log this car's first event.</div>
+        <div class="more-wrap">
+          <button class="more-btn" id="btn-more" aria-label="More actions" aria-haspopup="menu" aria-expanded="false">⋯</button>
+          <div class="more-menu" id="more-menu" role="menu">
+            <button id="btn-rename" role="menuitem">Rename car</button>
+            <button id="btn-duplicate" role="menuitem">Duplicate to new car</button>
+            <div class="sep" role="separator"></div>
+            <button id="btn-archive" class="danger" role="menuitem">Archive car…</button>
+          </div>
         </div>
       </div>
 
@@ -417,6 +466,40 @@
             <div class="lbl">Status</div>
             <div class="val mono" style="color:var(--pass);">Active</div>
           </div>
+        </div>
+      </div>
+
+      <div class="section-h">
+        <span>Event history</span>
+        <span class="count" id="events-count"></span>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter events">
+        <div class="search-wrap">
+          <span class="search-ico">⌕</span>
+          <input class="search" id="search" placeholder="Search track, kind, name…" aria-label="Search events" />
+        </div>
+        <div class="filler"></div>
+        <div class="results" id="results-count"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="events" aria-label="Events for this car">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="track">Event <span class="arrow">↓</span></th>
+              <th class="sortable sorted" data-sort="date">Dates <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="kind">Kind <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="stints" style="text-align:right;">Stints <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="verdict">Verdict <span class="arrow">↓</span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="events-body"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none;">
+          <div class="head">No matches</div>
+          <div>Try a different search.</div>
         </div>
       </div>
     </main>
@@ -454,8 +537,6 @@
 
     // Strip
     const carEvents = data.events.filter(ev => ev.cars.includes(car.id));
-    $('s-events').textContent = String(car.eventsCount || carEvents.length || 0).padStart(2, '0');
-    $('s-stints').textContent = String(car.sessionsCount).padStart(2, '0');
     const recentVerdict = (trend[trend.length - 1] || car.lastVerdict || 'pass').toUpperCase();
     const recentEl = $('s-recent');
     recentEl.textContent = recentVerdict;
@@ -469,12 +550,17 @@
     $('setup-driver').textContent = car.driver;
 
     // Events table
+    // Tight, consistent date format:
+    //   single day                    → "MAY 12, 2026"
+    //   range within same month       → "MAY 12–14, 2026"
+    //   range across months/years     → "DEC 30, 2025 – JAN 2, 2026"
+    const MONTH = (d) => d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
     const fmtRange = (start, end) => {
       const s = new Date(start), e = new Date(end);
-      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
-      return start === end
-        ? s.toLocaleDateString('en-US', opts).toUpperCase()
-        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+      if (start === end) return `${MONTH(s)} ${s.getUTCDate()}, ${s.getUTCFullYear()}`;
+      const sameMonth = s.getUTCFullYear() === e.getUTCFullYear() && s.getUTCMonth() === e.getUTCMonth();
+      if (sameMonth) return `${MONTH(s)} ${s.getUTCDate()}–${e.getUTCDate()}, ${s.getUTCFullYear()}`;
+      return `${MONTH(s)} ${s.getUTCDate()}, ${s.getUTCFullYear()} – ${MONTH(e)} ${e.getUTCDate()}, ${e.getUTCFullYear()}`;
     };
     const today = new Date('2026-05-14');
     const fmtAge = (s) => {
@@ -486,30 +572,81 @@
       return `${Math.round(days / 30)}MO AGO`;
     };
 
-    // Sort by date desc
-    const sortedEvents = [...carEvents].sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-    $('events-count').textContent = `${sortedEvents.length} events`;
+    $('events-count').textContent = `${carEvents.length} events`;
 
-    if (sortedEvents.length === 0) {
-      $('empty').style.display = '';
-    } else {
-      $('events-body').innerHTML = sortedEvents.map(ev => `
-        <tr tabindex="0" data-event="${ev.id}">
-          <td>
-            <div class="ev-track">${ev.track}</div>
-            <div class="ev-name">${ev.name.replace(ev.track + ' — ', '')}</div>
-          </td>
-          <td>
-            <div class="ev-dates">${fmtRange(ev.startDate, ev.endDate)}</div>
-            <div class="ev-age">${fmtAge(ev.startDate)}</div>
-          </td>
-          <td><span class="ev-kind">${ev.kind}</span></td>
-          <td style="text-align:right;"><span class="ev-stints">${ev.sessionsCount}</span></td>
-          <td><span class="verdict ${ev.verdict}">${ev.verdict}</span></td>
-          <td style="text-align:right;"><span class="arrow-end">→</span></td>
-        </tr>
-      `).join('');
+    const verdictRank = { fail: 3, warn: 2, pass: 1 };
+    const state = { query: '', sortKey: 'date', sortDir: 'desc' };
+
+    function applyFilter(rows) {
+      const q = state.query.trim().toLowerCase();
+      if (!q) return rows;
+      return rows.filter(ev =>
+        ev.track.toLowerCase().includes(q) ||
+        ev.kind.toLowerCase().includes(q) ||
+        ev.name.toLowerCase().includes(q)
+      );
     }
+    function applySort(rows) {
+      const dir = state.sortDir === 'asc' ? 1 : -1;
+      const key = state.sortKey;
+      return [...rows].sort((a, b) => {
+        let av, bv;
+        if (key === 'date') { av = new Date(a.startDate).getTime(); bv = new Date(b.startDate).getTime(); }
+        else if (key === 'verdict') { av = verdictRank[a.verdict]; bv = verdictRank[b.verdict]; }
+        else if (key === 'stints') { av = a.sessionsCount; bv = b.sessionsCount; }
+        else if (key === 'track') { av = a.track.toLowerCase(); bv = b.track.toLowerCase(); }
+        else if (key === 'kind') { av = a.kind.toLowerCase(); bv = b.kind.toLowerCase(); }
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      });
+    }
+
+    function render() {
+      const rows = applySort(applyFilter(carEvents));
+      const body = $('events-body');
+      const empty = $('empty');
+      $('results-count').textContent = `${rows.length} of ${carEvents.length}`;
+
+      if (rows.length === 0) {
+        body.innerHTML = '';
+        empty.style.display = '';
+      } else {
+        empty.style.display = 'none';
+        body.innerHTML = rows.map(ev => `
+          <tr tabindex="0" data-event="${ev.id}">
+            <td>
+              <div class="ev-track">${ev.track}</div>
+              <div class="ev-name">${ev.name.replace(ev.track + ' — ', '')}</div>
+            </td>
+            <td>
+              <div class="ev-dates">${fmtRange(ev.startDate, ev.endDate)}</div>
+              <div class="ev-age">${fmtAge(ev.startDate)}</div>
+            </td>
+            <td><span class="ev-kind">${ev.kind}</span></td>
+            <td style="text-align:right;"><span class="ev-stints">${ev.sessionsCount}</span></td>
+            <td><span class="verdict ${ev.verdict}">${ev.verdict}</span></td>
+            <td style="text-align:right;"><span class="arrow-end">→</span></td>
+          </tr>
+        `).join('');
+      }
+
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const k = th.dataset.sort;
+        th.classList.toggle('sorted', k === state.sortKey);
+        const arr = th.querySelector('.arrow');
+        if (arr) arr.textContent = state.sortDir === 'asc' ? '↑' : '↓';
+      });
+    }
+
+    $('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.sort;
+        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        else { state.sortKey = k; state.sortDir = 'desc'; }
+        render();
+      });
+    });
 
     document.getElementById('events-body').addEventListener('click', (e) => {
       const tr = e.target.closest('tr[data-event]');
@@ -523,6 +660,8 @@
       location.href = `car-event-detail.html?car=${car.id}&event=${tr.dataset.event}`;
     });
 
+    render();
+
     document.querySelectorAll('.nav a[data-nav]').forEach(a => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
@@ -530,10 +669,31 @@
       });
     });
 
+    // Overflow menu
+    const moreBtn = $('btn-more');
+    const moreMenu = $('more-menu');
+    function setMore(open) {
+      moreMenu.classList.toggle('open', open);
+      moreBtn.classList.toggle('open', open);
+      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    moreBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setMore(!moreMenu.classList.contains('open'));
+    });
+    document.addEventListener('click', (e) => {
+      if (!moreMenu.contains(e.target) && e.target !== moreBtn) setMore(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setMore(false);
+    });
+
     $('btn-edit').addEventListener('click', () => toast('Edit car — would open form'));
     $('btn-export').addEventListener('click', () => toast('Export history — would generate PDF'));
-    $('btn-archive').addEventListener('click', () => toast('Archive — would confirm (reversible)'));
     $('btn-upload').addEventListener('click', () => toast('Upload session — would open dropzone'));
+    $('btn-rename').addEventListener('click', () => { setMore(false); toast('Rename car — would open inline edit'); });
+    $('btn-duplicate').addEventListener('click', () => { setMore(false); toast('Duplicate to new car — would open form'); });
+    $('btn-archive').addEventListener('click', () => { setMore(false); toast('Archive car — would confirm (reversible)'); });
 
     let toastTimer;
     function toast(msg) {

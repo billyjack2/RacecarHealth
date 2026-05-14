@@ -99,14 +99,19 @@
       margin-bottom: 0;
     }
     .hero-top {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 24px;
+      display: grid;
+      grid-template-columns: 1fr minmax(280px, 360px);
+      gap: 28px;
+      align-items: start;
+    }
+    .hero-kind-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 8px;
     }
     .hero-kind {
       font-family: var(--mono); font-size: 10px;
       letter-spacing: 2px; text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 6px;
     }
     .hero-track {
       font-size: 38px; font-weight: 700;
@@ -127,22 +132,33 @@
       letter-spacing: 1.5px; text-transform: uppercase;
       margin-left: 10px;
     }
-    .hero-verdict {
-      display: inline-flex; align-items: center; gap: 12px;
-      padding: 14px 22px;
-      border: 2px solid currentColor;
-      font-family: var(--mono);
-      font-weight: 700; font-size: 18px; letter-spacing: 3px;
+
+    /* Notable callout (replaces the giant verdict block) */
+    .hero-notable {
+      border: 1px solid var(--border-strong);
+      background: rgba(0,0,0,0.3);
+      padding: 16px 18px;
+      position: relative;
     }
-    .hero-verdict::before {
-      content: ''; width: 10px; height: 10px;
-      background: currentColor; display: inline-block;
+    .hero-notable::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+      background: currentColor;
     }
-    .hero-verdict.pass { color: var(--pass); }
-    .hero-verdict.warn { color: var(--warn); }
-    .hero-verdict.fail { color: var(--fail); }
-    .hero-verdict.fail::before { animation: pulse 1.8s ease-in-out infinite; }
-    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+    .hero-notable.pass { color: var(--pass); }
+    .hero-notable.warn { color: var(--warn); }
+    .hero-notable.fail { color: var(--fail); }
+    .hero-notable .lbl {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .hero-notable .body {
+      font-size: 14px; line-height: 1.5;
+      color: var(--text);
+    }
+    .hero-notable.fail .body { color: var(--text); }
 
     /* Stat strip */
     .strip {
@@ -166,6 +182,36 @@
     }
     .strip .val.fail { color: var(--fail); }
     .strip .val.warn { color: var(--warn); }
+
+    /* Toolbar (event filters) */
+    .toolbar {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer; background: transparent;
+      transition: all 0.12s;
+      font-family: var(--sans);
+    }
+    .chip:hover { color: var(--text); border-color: var(--border-strong); }
+    .chip.active {
+      color: var(--accent); border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .chip .ct {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text-dim); margin-left: 6px;
+    }
+    .chip.active .ct { color: var(--accent); }
+    .toolbar .filler { flex: 1; }
+    .toolbar .results {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1.5px;
+    }
 
     /* Actions */
     .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
@@ -277,17 +323,52 @@
 
     .session-row {
       display: grid;
-      grid-template-columns: 80px 1fr 90px 100px 110px 40px;
-      gap: 16px;
+      grid-template-columns: 80px 1fr 90px 100px 110px 38px 24px;
+      gap: 12px;
       align-items: center;
       padding: 12px 4px;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: background 0.08s;
+      position: relative;
     }
     .session-row:last-child { border-bottom: 0; }
     .session-row:hover { background: var(--surface-2); }
     .session-row:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+
+    /* Per-stint kebab menu */
+    .kebab-wrap { position: relative; }
+    .kebab-btn {
+      background: transparent; color: var(--text-dim);
+      border: 1px solid transparent;
+      width: 24px; height: 24px;
+      font-family: var(--mono); font-size: 16px;
+      cursor: pointer; padding: 0;
+      transition: all 0.12s;
+    }
+    .session-row:hover .kebab-btn { color: var(--text-muted); }
+    .kebab-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
+    .kebab-btn.open { background: var(--surface-3); color: var(--accent); border-color: var(--accent); }
+    .kebab-menu {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      min-width: 220px;
+      display: none;
+      z-index: 30;
+      cursor: default;
+    }
+    .kebab-menu.open { display: block; }
+    .kebab-menu button {
+      display: block; width: 100%;
+      background: transparent; border: 0;
+      padding: 10px 14px; text-align: left;
+      font-family: var(--sans); font-size: 12px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text); cursor: pointer;
+    }
+    .kebab-menu button:hover { background: var(--surface-2); }
+    .kebab-menu .sep { height: 1px; background: var(--border); margin: 4px 0; }
 
     .sess-time {
       font-family: var(--mono); font-size: 13px;
@@ -385,7 +466,10 @@
       <section class="hero">
         <div class="hero-top">
           <div>
-            <div class="hero-kind" id="hero-kind"></div>
+            <div class="hero-kind-row">
+              <div class="hero-kind" id="hero-kind"></div>
+              <span class="verdict" id="hero-verdict-pill"></span>
+            </div>
             <h1 class="hero-track" id="hero-track"></h1>
             <div class="hero-name" id="hero-name"></div>
             <div class="hero-dates">
@@ -393,7 +477,10 @@
               <span class="age" id="hero-age"></span>
             </div>
           </div>
-          <div class="hero-verdict" id="hero-verdict">Fail</div>
+          <div class="hero-notable" id="hero-notable">
+            <div class="lbl">Notable</div>
+            <div class="body" id="hero-notable-body"></div>
+          </div>
         </div>
       </section>
 
@@ -417,7 +504,6 @@
       </div>
 
       <div class="actions">
-        <button class="btn" id="btn-rebucket">Re-bucket sessions</button>
         <button class="btn" id="btn-export">Export event report</button>
         <button class="btn primary" id="btn-share">Share</button>
       </div>
@@ -425,6 +511,13 @@
       <div class="section-h">
         <span>Cars at event</span>
         <span class="count" id="cars-count"></span>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter event view">
+        <button class="chip" id="chip-latest" aria-pressed="false">Latest stint only</button>
+        <button class="chip" id="chip-failed" aria-pressed="false">Failed only</button>
+        <div class="filler"></div>
+        <div class="results" id="filter-results"></div>
       </div>
 
       <div class="car-rows" id="car-rows"></div>
@@ -485,9 +578,13 @@
     $('hero-dates').textContent = fmtRange(event.startDate, event.endDate);
     $('hero-age').textContent = fmtAge(event.startDate);
 
-    const v = $('hero-verdict');
-    v.classList.add(event.verdict);
-    v.textContent = event.verdict.toUpperCase();
+    const verdictPill = $('hero-verdict-pill');
+    verdictPill.classList.add(event.verdict);
+    verdictPill.textContent = event.verdict;
+
+    const notable = $('hero-notable');
+    notable.classList.add(event.verdict);
+    $('hero-notable-body').textContent = event.notable || 'No notable callouts for this event.';
 
     // Strip stats — derive from event + use real session if it matches
     const matchingSession = (data.session && data.session.car && data.session.track === event.track && data.session.date === event.startDate)
@@ -536,59 +633,154 @@
     }
 
     const carsBody = $('car-rows');
-    carsBody.innerHTML = event.cars.map(carId => {
-      const car = carById[carId];
-      if (!car) return '';
-      const sessions = sessionsForCarAtEvent(carId, event);
-      const rollup = rollupVerdict(sessions);
-      return `
-        <div class="car-row" data-car="${carId}">
-          <div class="car-row-head" tabindex="0" role="button" aria-expanded="false">
-            <div class="cr-num">${car.number}</div>
-            <div>
-              <div class="cr-name">${car.name}</div>
-              <div class="cr-driver">${car.driver}</div>
-            </div>
-            <div class="cr-type">${car.carType}</div>
-            <div class="cr-stints"><span class="ct">${sessions.length}</span>stints</div>
-            <div class="session-dots" aria-label="Per-stint verdict">
-              ${sessions.map(s => `<span class="dot ${s.verdict}" title="${s.name} — ${s.verdict}"></span>`).join('')}
-            </div>
-            <div><span class="verdict ${rollup}">${rollup}</span></div>
-            <div class="chevron">▸</div>
-          </div>
-          <div class="sessions">
-            ${sessions.map(s => `
-              <div class="session-row" data-session="${s.id}" tabindex="0" role="button">
-                <div class="sess-time">
-                  ${s.time}
-                  <div class="date">stint ${s.stintNumber}</div>
-                </div>
-                <div class="sess-name">
-                  ${s.name}
-                  <div class="file">${s.id.startsWith('synthetic') ? '' : s.name}</div>
-                </div>
-                <div class="sess-duration">${s.duration}</div>
-                <div class="sess-samples">${s.samples} samples</div>
-                <div><span class="verdict ${s.verdict}">${s.verdict}</span></div>
-                <div style="text-align:right;"><span class="arrow-end">→</span></div>
+
+    // Filter state for this view
+    const view = { latestOnly: false, failedOnly: false };
+
+    // Cache full session lists so toggles don't re-synthesize different verdicts each pass
+    const sessionsByCar = Object.fromEntries(
+      event.cars.map(cid => [cid, sessionsForCarAtEvent(cid, event)])
+    );
+
+    function visibleSessions(carId) {
+      let s = sessionsByCar[carId] || [];
+      if (view.latestOnly) {
+        const last = s.reduce((acc, x) => (x.stintNumber > (acc?.stintNumber ?? -1) ? x : acc), null);
+        s = last ? [last] : [];
+      }
+      if (view.failedOnly) s = s.filter(x => x.verdict !== 'pass');
+      return s;
+    }
+
+    function renderCars() {
+      // Track which rows are currently open so toggling filters preserves expansion
+      const openCars = new Set(
+        Array.from(carsBody.querySelectorAll('.car-row.open')).map(r => r.dataset.car)
+      );
+
+      const carsToShow = event.cars.filter(carId => {
+        const car = carById[carId];
+        if (!car) return false;
+        if (view.failedOnly) {
+          // Hide cars whose full rollup is pass
+          const rollup = rollupVerdict(sessionsByCar[carId]);
+          if (rollup === 'pass') return false;
+        }
+        return true;
+      });
+
+      carsBody.innerHTML = carsToShow.map(carId => {
+        const car = carById[carId];
+        const fullSessions = sessionsByCar[carId];
+        const shownSessions = visibleSessions(carId);
+        const rollup = rollupVerdict(fullSessions);
+        const filtered = shownSessions.length !== fullSessions.length;
+        return `
+          <div class="car-row${openCars.has(carId) ? ' open' : ''}" data-car="${carId}">
+            <div class="car-row-head" tabindex="0" role="button" aria-expanded="${openCars.has(carId)}">
+              <div class="cr-num">${car.number}</div>
+              <div>
+                <div class="cr-name">${car.name}</div>
+                <div class="cr-driver">${car.driver}</div>
               </div>
-            `).join('')}
-            <div class="sess-summary">
-              <span>Per-(car, event) report rolls up these ${sessions.length} stints</span>
-              <span class="sep">·</span>
-              <a href="#" data-open-car-event="${carId}">Open ${car.name} #${car.number} at ${event.track} →</a>
+              <div class="cr-type">${car.carType}</div>
+              <div class="cr-stints"><span class="ct">${shownSessions.length}${filtered ? `/${fullSessions.length}` : ''}</span>stints</div>
+              <div class="session-dots" aria-label="Per-stint verdict">
+                ${fullSessions.map(s => `<span class="dot ${s.verdict}" title="${s.name} — ${s.verdict}"></span>`).join('')}
+              </div>
+              <div><span class="verdict ${rollup}">${rollup}</span></div>
+              <div class="chevron">▸</div>
+            </div>
+            <div class="sessions">
+              ${shownSessions.map(s => `
+                <div class="session-row" data-session="${s.id}" tabindex="0" role="button">
+                  <div class="sess-time">
+                    ${s.time}
+                    <div class="date">stint ${s.stintNumber}</div>
+                  </div>
+                  <div class="sess-name">
+                    ${s.name}
+                    <div class="file">${s.id.startsWith('synthetic') ? '' : s.name}</div>
+                  </div>
+                  <div class="sess-duration">${s.duration}</div>
+                  <div class="sess-samples">${s.samples} samples</div>
+                  <div><span class="verdict ${s.verdict}">${s.verdict}</span></div>
+                  <div style="text-align:right;"><span class="arrow-end">→</span></div>
+                  <div class="kebab-wrap">
+                    <button class="kebab-btn" aria-label="Stint actions" aria-haspopup="menu" aria-expanded="false" data-kebab="${s.id}">⋯</button>
+                    <div class="kebab-menu" role="menu" data-kebab-menu="${s.id}">
+                      <button data-act="move" data-session-id="${s.id}" role="menuitem">Move to another event…</button>
+                      <button data-act="edit" data-session-id="${s.id}" role="menuitem">Edit stint</button>
+                      <div class="sep" role="separator"></div>
+                      <button data-act="rerun" data-session-id="${s.id}" role="menuitem">Re-run checks</button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+              <div class="sess-summary">
+                <span>Per-(car, event) report rolls up these ${shownSessions.length}${filtered ? ` of ${fullSessions.length}` : ''} stints</span>
+                <span class="sep">·</span>
+                <a href="#" data-open-car-event="${carId}">Open ${car.name} #${car.number} at ${event.track} →</a>
+              </div>
             </div>
           </div>
-        </div>
-      `;
-    }).join('');
+        `;
+      }).join('');
+
+      const totalStints = event.cars.reduce((n, cid) => n + (sessionsByCar[cid]?.length || 0), 0);
+      const shownStints = carsToShow.reduce((n, cid) => n + visibleSessions(cid).length, 0);
+      $('filter-results').textContent = (view.latestOnly || view.failedOnly)
+        ? `${carsToShow.length}/${event.cars.length} cars · ${shownStints}/${totalStints} stints`
+        : `${event.cars.length} cars · ${totalStints} stints`;
+    }
+
+    renderCars();
 
     // Toggle expand / navigate
     function carEventHref(carId) { return `car-event-detail.html?car=${carId}&event=${event.id}`; }
 
+    function closeAllKebabs(except) {
+      carsBody.querySelectorAll('.kebab-menu.open').forEach(m => {
+        if (m === except) return;
+        m.classList.remove('open');
+        const btn = m.parentElement.querySelector('.kebab-btn');
+        if (btn) {
+          btn.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
     carsBody.addEventListener('click', (e) => {
-      // Stint row click → car-event detail (stint is one of many within that view)
+      // Kebab toggle
+      const kebab = e.target.closest('.kebab-btn[data-kebab]');
+      if (kebab) {
+        e.stopPropagation();
+        const id = kebab.dataset.kebab;
+        const menu = carsBody.querySelector(`.kebab-menu[data-kebab-menu="${id}"]`);
+        const willOpen = !menu.classList.contains('open');
+        closeAllKebabs(menu);
+        menu.classList.toggle('open', willOpen);
+        kebab.classList.toggle('open', willOpen);
+        kebab.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        return;
+      }
+      // Kebab menu item
+      const menuItem = e.target.closest('.kebab-menu button[data-act]');
+      if (menuItem) {
+        e.stopPropagation();
+        closeAllKebabs(null);
+        const act = menuItem.dataset.act;
+        const sid = menuItem.dataset.sessionId;
+        const labels = {
+          move: `Move stint ${sid} to another event — would open picker`,
+          edit: `Edit stint ${sid} — would open editor`,
+          rerun: `Re-run checks for stint ${sid} — would queue job`,
+        };
+        toast(labels[act] || 'Stint action');
+        return;
+      }
+      // Stint row click → car-event detail
       const sess = e.target.closest('.session-row[data-session]');
       if (sess) {
         e.stopPropagation();
@@ -629,12 +821,36 @@
       }
     });
 
+    // Click outside any kebab closes the open one
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.kebab-wrap')) closeAllKebabs(null);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllKebabs(null);
+    });
+
     // Open the first car by default for demo richness
     const firstRow = carsBody.querySelector('.car-row');
     if (firstRow) {
       firstRow.classList.add('open');
       firstRow.querySelector('.car-row-head').setAttribute('aria-expanded', 'true');
     }
+
+    // Filter chips
+    function setChip(btn, on) {
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    $('chip-latest').addEventListener('click', () => {
+      view.latestOnly = !view.latestOnly;
+      setChip($('chip-latest'), view.latestOnly);
+      renderCars();
+    });
+    $('chip-failed').addEventListener('click', () => {
+      view.failedOnly = !view.failedOnly;
+      setChip($('chip-failed'), view.failedOnly);
+      renderCars();
+    });
 
     document.querySelectorAll('.nav a[data-nav]').forEach(a => {
       a.addEventListener('click', (e) => {
@@ -643,7 +859,6 @@
       });
     });
 
-    $('btn-rebucket').addEventListener('click', () => toast('Re-bucket sessions — would open dialog'));
     $('btn-export').addEventListener('click', () => toast('Export event report — would generate PDF'));
     $('btn-share').addEventListener('click', () => toast('Share — would copy link'));
 

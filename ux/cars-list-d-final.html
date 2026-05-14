@@ -119,7 +119,7 @@
 
     /* Stats */
     .stats {
-      display: grid; grid-template-columns: repeat(4, 1fr);
+      display: grid; grid-template-columns: repeat(2, 1fr);
       gap: 0; border: 1px solid var(--border);
       margin-bottom: 24px;
     }
@@ -482,16 +482,6 @@
           <div class="stat-val" id="stat-events"></div>
           <div class="stat-sub">5 tracks visited</div>
         </div>
-        <div class="stat">
-          <div class="stat-lbl">Sessions / 7d</div>
-          <div class="stat-val" id="stat-sessions"></div>
-          <div class="stat-sub">+3 vs prior week</div>
-        </div>
-        <div class="stat">
-          <div class="stat-lbl">Failures / 7d</div>
-          <div class="stat-val fail" id="stat-fails"></div>
-          <div class="stat-sub">#88 Bolt · Road Atlanta</div>
-        </div>
       </section>
 
       <div class="toolbar" role="toolbar" aria-label="Filter cars">
@@ -600,8 +590,6 @@
     $('user-role').textContent = data.user.role;
     $('stat-cars').textContent = String(data.team.activeCars).padStart(2, '0');
     $('stat-events').textContent = String(data.events.length).padStart(2, '0');
-    $('stat-sessions').textContent = String(data.team.sessionsThisWeek).padStart(2, '0');
-    $('stat-fails').textContent = String(data.team.failuresThisWeek).padStart(2, '0');
     $('footer-events').textContent = `${data.events.length} events / 30d`;
 
     // Filter chip counts
