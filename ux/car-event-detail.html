@@ -7,88 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
   <style>
-    :root {
-      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
-      --border: #262a31; --border-strong: #3a3f48;
-      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
-      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
-      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
-      --sans: 'Inter', system-ui, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: var(--sans); font-size: 14px; line-height: 1.45;
-      -webkit-font-smoothing: antialiased;
-      background-image:
-        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
-    }
-    a { color: inherit; text-decoration: none; }
-    button { font-family: var(--sans); }
-    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-
-    /* Sidebar */
-    .sidebar {
-      background: rgba(10,11,13,0.92);
-      border-right: 1px solid var(--border);
-      padding: 18px 12px 16px;
-      display: flex; flex-direction: column;
-      position: sticky; top: 0; height: 100vh;
-      backdrop-filter: blur(8px);
-    }
-    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
-    .brand svg { height: 28px; }
-    .nav { display: flex; flex-direction: column; gap: 1px; }
-    .nav a {
-      display: flex; align-items: center; gap: 12px;
-      padding: 9px 10px;
-      font-size: 12px; font-weight: 500;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-muted);
-      border-left: 2px solid transparent;
-      cursor: pointer;
-    }
-    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
-    .nav a:hover { color: var(--text); background: var(--surface); }
-    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
-    .nav-section {
-      margin-top: 18px; padding: 0 10px 8px;
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 2px; color: var(--text-dim);
-      text-transform: uppercase;
-    }
-    .user-foot {
-      margin-top: auto; padding: 12px 8px;
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .avatar {
-      width: 30px; height: 30px;
-      background: var(--accent); color: #0a0b0d;
-      display: grid; place-items: center;
-      font-family: var(--mono); font-size: 12px; font-weight: 700;
-    }
-    .user-foot .who { font-size: 12px; }
-    .user-foot .role { color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
-
-    .main { padding: 24px 36px 60px; max-width: 1280px; }
-
-    .crumbs {
-      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: 18px;
-    }
-    .crumbs a { color: var(--text-muted); }
-    .crumbs a:hover { color: var(--text); }
-    .crumbs .sep { color: var(--text-dim); margin: 0 8px; }
-    .crumbs .here { color: var(--text); }
-
-    /* Hero combines car + event identity */
+    /* Page-specific: combined car+event hero, strip, stints grid, check rollup */
     .hero {
       border: 1px solid var(--border);
       background:
@@ -121,16 +42,13 @@
       font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
       color: var(--text-dim);
     }
-    .hero-mid .event-track {
-      font-size: 18px; font-weight: 600;
-      margin-top: 4px;
-    }
+    .hero-mid .event-track { font-size: 18px; font-weight: 600; margin-top: 4px; }
     .hero-mid .event-meta {
       font-family: var(--mono); font-size: 11px;
       color: var(--text-muted); margin-top: 2px;
       letter-spacing: 0.5px;
     }
-    /* Strip */
+
     .strip {
       display: grid; grid-template-columns: repeat(5, 1fr);
       border: 1px solid var(--border);
@@ -138,47 +56,18 @@
       background: var(--surface);
       margin-bottom: 22px;
     }
-    .strip > div {
-      padding: 14px 18px;
-      border-right: 1px solid var(--border);
-    }
+    .strip > div { padding: 14px 18px; border-right: 1px solid var(--border); }
     .strip > div:last-child { border-right: 0; }
     .strip .lbl {
       font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
       color: var(--text-dim); margin-bottom: 4px;
     }
-    .strip .val {
-      font-family: var(--mono); font-size: 16px; font-weight: 500;
-    }
+    .strip .val { font-family: var(--mono); font-size: 16px; font-weight: 500; }
     .strip .val.pass { color: var(--pass); }
     .strip .val.warn { color: var(--warn); }
     .strip .val.fail { color: var(--fail); }
 
-    /* Actions */
     .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 20px; }
-    .btn {
-      background: transparent; color: var(--text);
-      border: 1px solid var(--border-strong);
-      padding: 8px 14px;
-      font-family: var(--sans); font-weight: 600;
-      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.12s;
-    }
-    .btn:hover { background: var(--surface); }
-    .btn.primary { background: var(--accent); color: #0a0b0d; border-color: var(--accent); }
-
-    /* Section heading */
-    .section-h {
-      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--text-muted);
-      margin: 32px 0 14px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .section-h .count {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--text-dim); letter-spacing: 1.5px;
-    }
 
     /* Stints */
     .stints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -198,7 +87,6 @@
     .stint.pass::before { background: var(--pass); }
     .stint.warn::before { background: var(--warn); }
     .stint.fail::before { background: var(--fail); }
-
     .stint-num {
       font-family: var(--mono);
       font-size: 10px; letter-spacing: 2px;
@@ -237,15 +125,11 @@
       background: var(--surface-2);
       border-bottom: 1px solid var(--border);
     }
-    .group-name {
-      font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-      font-weight: 700;
-    }
+    .group-name { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
     .group-count {
       font-family: var(--mono); font-size: 11px;
       color: var(--text-dim); letter-spacing: 1px;
     }
-
     .check {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -273,7 +157,6 @@
     .rollup.pass { color: var(--pass); }
     .rollup.warn { color: var(--warn); }
     .rollup.fail { color: var(--fail); }
-
     .check-results { display: flex; gap: 6px; align-items: center; }
     .file-result {
       flex: 1;
@@ -288,63 +171,15 @@
       font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
       color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;
     }
-    .file-result .fr-val {
-      font-family: var(--mono); font-size: 13px; font-weight: 600;
-    }
+    .file-result .fr-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
     .file-result.pass .fr-val { color: var(--pass); }
     .file-result.warn .fr-val { color: var(--warn); }
     .file-result.fail .fr-val { color: var(--fail); }
-
-    .toast {
-      position: fixed;
-      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--surface-3);
-      border: 1px solid var(--accent);
-      padding: 12px 20px;
-      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--accent);
-      opacity: 0;
-      transition: opacity 0.18s, transform 0.18s;
-      pointer-events: none; z-index: 200;
-      font-family: var(--mono);
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar">
-      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
-        <svg viewBox="0 0 260 48" aria-hidden="true">
-          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-            <rect x="3" y="14" width="22" height="20" rx="10"/>
-            <rect x="17" y="14" width="22" height="20" rx="10"/>
-          </g>
-          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
-          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
-        </svg>
-      </a>
-      <nav class="nav" aria-label="Primary">
-        <a href="cars-list-d-final.html"><span class="ico">▸</span> Fleet</a>
-        <a href="events-list.html" class="active"><span class="ico">◈</span> Events</a>
-        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
-        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
-      </nav>
-      <div class="nav-section">Configure</div>
-      <nav class="nav" aria-label="Configure">
-        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
-        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
-        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
-        <a href="team-settings.html"><span class="ico">⚙</span> Settings</a>
-      </nav>
-      <div class="user-foot">
-        <span class="avatar" id="user-init"></span>
-        <div>
-          <div class="who" id="user-name"></div>
-          <div class="role" id="user-role"></div>
-        </div>
-      </div>
-    </aside>
+    <aside id="sidebar" data-active="events"></aside>
 
     <main class="main">
       <div class="crumbs">
@@ -390,9 +225,9 @@
       </div>
 
       <div class="actions">
-        <button class="btn" id="btn-rebucket">Re-bucket stints</button>
-        <button class="btn" id="btn-export">Export PDF</button>
-        <button class="btn primary" id="btn-share">Share report</button>
+        <button class="btn-ghost" id="btn-rebucket">Re-bucket stints</button>
+        <button class="btn-ghost" id="btn-export">Export PDF</button>
+        <button class="btn" id="btn-share">Share report</button>
       </div>
 
       <div class="section-h">
@@ -409,21 +244,18 @@
     </main>
   </div>
 
-  <div class="toast" id="toast"></div>
-
   <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
   <script>
     const data = window.CROSSLINK;
     const $ = (id) => document.getElementById(id);
 
-    // Defensive fallback for events
     data.events = data.events || [];
 
     const params = new URLSearchParams(location.search);
     const requestedCarId = params.get('car');
     const requestedEventId = params.get('event');
 
-    // Default demo target: car #88 Bolt at Road Atlanta (the populated session)
     const car = (requestedCarId && data.cars.find(c => c.id === requestedCarId))
       || data.cars.find(c => c.id === 'car_88')
       || data.cars[0];
@@ -435,10 +267,6 @@
         startDate: car.lastSessionAt, endDate: car.lastSessionAt, kind: 'Test day',
         cars: [car.id], sessionsCount: 1, verdict: car.lastVerdict,
       };
-
-    $('user-name').textContent = data.user.name;
-    $('user-init').textContent = data.user.initials;
-    $('user-role').textContent = data.user.role;
 
     const fmtRange = (start, end) => {
       const s = new Date(start), e = new Date(end);
@@ -465,10 +293,8 @@
     $('hero-event-track').textContent = event.track;
     $('hero-event-meta').textContent = `${event.kind} · ${fmtRange(event.startDate, event.endDate)}`;
 
-    // Use the fully-populated session when this view targets the car/event it covers
     const fullSession = (data.session && data.session.car && car.number === data.session.car.number) ? data.session : null;
 
-    // Stints
     function buildStints() {
       if (fullSession) {
         return fullSession.files.map((f, i) => ({
@@ -494,7 +320,6 @@
     }
     const stints = buildStints();
 
-    // Summary
     function buildSummary() {
       if (fullSession) return fullSession.summary;
       const checksRun = 8;
@@ -523,7 +348,6 @@
       </div>
     `).join('');
 
-    // Check groups — use real session groups when available, else synthesize
     function buildGroups() {
       if (fullSession) return fullSession.checkGroups;
       return [
@@ -575,43 +399,26 @@
       </section>
     `).join('');
 
-    // Stint click → toast (would open per-stint detail; v1 may not need a deeper view)
-    document.getElementById('stints').addEventListener('click', (e) => {
+    $('stints').addEventListener('click', (e) => {
       const stint = e.target.closest('.stint[data-stint]');
       if (stint) {
         const s = stints.find(x => x.id === stint.dataset.stint);
-        toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+        RCH.toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
       }
     });
-    document.getElementById('stints').addEventListener('keydown', (e) => {
+    $('stints').addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const stint = e.target.closest('.stint[data-stint]');
       if (stint) {
         e.preventDefault();
         const s = stints.find(x => x.id === stint.dataset.stint);
-        toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+        RCH.toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
       }
     });
 
-    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        toast(`${a.textContent.trim()} — coming next`);
-      });
-    });
-
-    $('btn-rebucket').addEventListener('click', () => toast('Re-bucket stints — would open dialog'));
-    $('btn-export').addEventListener('click', () => toast('Export PDF — would generate report'));
-    $('btn-share').addEventListener('click', () => toast('Share — would copy link'));
-
-    let toastTimer;
-    function toast(msg) {
-      const t = $('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
-    }
+    $('btn-rebucket').addEventListener('click', () => RCH.toast('Re-bucket stints — would open dialog'));
+    $('btn-export').addEventListener('click', () => RCH.toast('Export PDF — would generate report'));
+    $('btn-share').addEventListener('click', () => RCH.toast('Share — would copy link'));
   </script>
 </body>
 </html>

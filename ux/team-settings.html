@@ -7,111 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
   <style>
-    :root {
-      --bg: #0a0b0d; --surface: #14161a; --surface-2: #1c1f24; --surface-3: #22262c;
-      --border: #262a31; --border-strong: #3a3f48;
-      --text: #ebe9e3; --text-muted: #8a8d94; --text-dim: #5a5d63;
-      --accent: #f59e0b; --accent-dim: rgba(245,158,11,0.16);
-      --pass: #22c55e; --warn: #f59e0b; --fail: #ef4444;
-      --sans: 'Inter', system-ui, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: var(--sans); font-size: 14px; line-height: 1.45;
-      -webkit-font-smoothing: antialiased;
-      background-image:
-        radial-gradient(circle at top right, rgba(245,158,11,0.04), transparent 30%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
-    }
-    a { color: inherit; text-decoration: none; }
-    button { font-family: var(--sans); }
-    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-
-    /* Sidebar (shared) */
-    .sidebar {
-      background: rgba(10,11,13,0.92);
-      border-right: 1px solid var(--border);
-      padding: 18px 12px 16px;
-      display: flex; flex-direction: column;
-      position: sticky; top: 0; height: 100vh;
-      backdrop-filter: blur(8px);
-    }
-    .brand { display: flex; align-items: center; color: var(--accent); padding: 4px 10px 18px; }
-    .brand svg { height: 28px; }
-    .nav { display: flex; flex-direction: column; gap: 1px; }
-    .nav a {
-      display: flex; align-items: center; gap: 12px;
-      padding: 9px 10px;
-      font-size: 12px; font-weight: 500;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-muted);
-      border-left: 2px solid transparent;
-      cursor: pointer;
-    }
-    .nav a .ico { display: inline-grid; place-items: center; width: 14px; height: 14px; font-family: var(--mono); font-size: 13px; }
-    .nav a:hover { color: var(--text); background: var(--surface); }
-    .nav a.active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
-    .nav-section {
-      margin-top: 18px; padding: 0 10px 8px;
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 2px; color: var(--text-dim);
-      text-transform: uppercase;
-    }
-    .user-foot {
-      margin-top: auto; padding: 12px 8px;
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .avatar {
-      width: 30px; height: 30px;
-      background: var(--accent); color: #0a0b0d;
-      display: grid; place-items: center;
-      font-family: var(--mono); font-size: 12px; font-weight: 700;
-    }
-    .user-foot .who { font-size: 12px; }
-    .user-foot .role { color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
-
-    .main { padding: 28px 36px 60px; max-width: 1080px; }
-
-    .page-head {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      margin-bottom: 28px;
-    }
-    .page-title {
-      font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--text-muted); margin: 0 0 6px;
-    }
-    .page-h1 {
-      font-size: 36px; font-weight: 700;
-      letter-spacing: -0.5px; margin: 0;
-      text-transform: uppercase;
-    }
-
-    /* Section heading */
-    .section-h {
-      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--text-muted);
-      margin: 32px 0 14px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .section-h:first-child { margin-top: 0; }
-    .section-h::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .section-h .count {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--text-dim); letter-spacing: 1.5px;
-    }
-
-    /* Card */
-    .card {
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
+    /* Page-specific: card chrome, members table cells, danger zone */
+    .card { border: 1px solid var(--border); background: var(--surface); }
     .card .body { padding: 22px 24px; }
     .card .foot {
       padding: 14px 24px;
@@ -125,109 +24,6 @@
       letter-spacing: 1.5px; text-transform: uppercase;
       color: var(--text-dim);
     }
-
-    /* Form fields */
-    .field { margin-bottom: 18px; }
-    .field:last-child { margin-bottom: 0; }
-    label {
-      display: block;
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
-    label .opt {
-      color: var(--text-dim); margin-left: 6px;
-      font-family: var(--mono); font-size: 9px;
-      letter-spacing: 1.5px;
-    }
-    input[type="text"], input[type="email"], textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border-strong);
-      color: var(--text);
-      font-family: var(--sans); font-size: 13px;
-      padding: 10px 12px;
-      transition: border-color 0.12s;
-    }
-    input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
-      outline: none; border-color: var(--accent);
-    }
-
-    /* Logo row (matches create-team pattern) */
-    .logo-row {
-      display: grid;
-      grid-template-columns: 88px 1fr auto;
-      gap: 18px;
-      align-items: center;
-    }
-    .logo-preview {
-      width: 88px; height: 88px;
-      border: 1px dashed var(--border-strong);
-      display: grid; place-items: center;
-      color: var(--text-dim);
-      font-family: var(--mono); font-size: 9px;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      background: var(--bg);
-      overflow: hidden;
-      transition: border-color 0.12s, border-style 0.12s;
-    }
-    .logo-preview.has-image {
-      border-style: solid;
-      border-color: var(--border-strong);
-      background: #ffffff;
-    }
-    .logo-preview img {
-      max-width: 100%; max-height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .logo-hint {
-      font-size: 12px; color: var(--text-muted);
-      line-height: 1.5;
-    }
-    .logo-hint .mono {
-      font-family: var(--mono); font-size: 10px;
-      color: var(--text-dim);
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-      display: block;
-    }
-
-    /* Buttons */
-    .btn {
-      background: var(--accent); color: #0a0b0d;
-      border: 0; padding: 9px 16px;
-      font-weight: 600; font-size: 11px;
-      letter-spacing: 2px; text-transform: uppercase;
-      cursor: pointer; transition: filter 0.12s;
-      font-family: var(--sans);
-    }
-    .btn:hover:not(:disabled) { filter: brightness(1.1); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-ghost {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      padding: 9px 16px;
-      font-weight: 600; font-size: 11px;
-      letter-spacing: 2px; text-transform: uppercase;
-      cursor: pointer;
-      font-family: var(--sans);
-    }
-    .btn-ghost:hover { background: var(--surface-2); }
-    .btn-thin {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      padding: 8px 14px;
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      font-weight: 600; cursor: pointer;
-      white-space: nowrap;
-      font-family: var(--sans);
-    }
-    .btn-thin:hover { background: var(--surface-2); }
-    .btn-thin.danger { color: var(--fail); border-color: rgba(239,68,68,0.4); }
-    .btn-thin.danger:hover { background: rgba(239,68,68,0.08); }
 
     /* Members table */
     .members-head {
@@ -257,9 +53,7 @@
     table.members tbody tr:last-child td { border-bottom: 0; }
     table.members tbody tr:hover { background: var(--surface-2); }
 
-    .member-cell {
-      display: flex; align-items: center; gap: 12px;
-    }
+    .member-cell { display: flex; align-items: center; gap: 12px; }
     .member-avatar {
       width: 32px; height: 32px;
       background: var(--surface-3);
@@ -282,13 +76,8 @@
       padding: 1px 6px;
       border: 1px solid var(--accent);
     }
-    .member-title {
-      font-size: 12px; color: var(--text-muted); margin-top: 2px;
-    }
-    .member-email {
-      font-family: var(--mono); font-size: 12px;
-      color: var(--text-muted);
-    }
+    .member-title { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .member-email { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
 
     .role-pill {
       display: inline-flex; align-items: center; gap: 6px;
@@ -300,10 +89,7 @@
     .role-pill.owner { color: var(--accent); }
     .role-pill.admin { color: var(--text); }
     .role-pill.member { color: var(--text-muted); }
-    .role-pill.pending {
-      color: var(--warn);
-      border-style: dashed;
-    }
+    .role-pill.pending { color: var(--warn); border-style: dashed; }
 
     .last-active {
       font-family: var(--mono); font-size: 11px;
@@ -312,56 +98,12 @@
     }
     .last-active.dim { color: var(--text-dim); }
 
-    /* Kebab menu */
-    .kebab-wrap { position: relative; }
-    .kebab-btn {
-      background: transparent; color: var(--text-dim);
-      border: 1px solid transparent;
-      width: 28px; height: 28px;
-      font-family: var(--mono); font-size: 16px;
-      cursor: pointer; padding: 0;
-      transition: all 0.12s;
-    }
-    .kebab-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
-    .kebab-btn.open { background: var(--surface-3); color: var(--accent); border-color: var(--accent); }
-    .kebab-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .kebab-menu {
-      position: absolute; top: calc(100% + 4px); right: 0;
-      background: var(--surface);
-      border: 1px solid var(--border-strong);
-      min-width: 200px;
-      display: none;
-      z-index: 30;
-    }
-    .kebab-menu.open { display: block; }
-    .kebab-menu button {
-      display: block; width: 100%;
-      background: transparent; border: 0;
-      padding: 10px 14px; text-align: left;
-      font-family: var(--sans); font-size: 12px;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text); cursor: pointer;
-    }
-    .kebab-menu button:hover { background: var(--surface-2); }
-    .kebab-menu button.danger { color: var(--fail); }
-    .kebab-menu button.danger:hover { background: rgba(239,68,68,0.08); }
-    .kebab-menu .sep { height: 1px; background: var(--border); margin: 4px 0; }
-    .kebab-menu .group-label {
-      padding: 8px 14px 4px;
-      font-family: var(--mono); font-size: 9px;
-      letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
     /* Danger zone */
     .danger-card {
       border: 1px solid rgba(239,68,68,0.35);
       background: var(--surface);
     }
-    .danger-card::before {
-      content: ''; display: block;
-      height: 2px; background: var(--fail);
-    }
+    .danger-card::before { content: ''; display: block; height: 2px; background: var(--fail); }
     .danger-row {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -371,10 +113,7 @@
       border-bottom: 1px solid var(--border);
     }
     .danger-row:last-child { border-bottom: 0; }
-    .danger-row .title {
-      font-size: 14px; font-weight: 600;
-      margin-bottom: 4px;
-    }
+    .danger-row .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .danger-row .desc {
       font-size: 12px; color: var(--text-muted);
       max-width: 60ch; line-height: 1.5;
@@ -385,71 +124,13 @@
       font-size: 11px;
       letter-spacing: 0.5px;
     }
-    .btn-danger {
-      background: transparent;
-      color: var(--fail);
-      border: 1px solid var(--fail);
-      padding: 9px 16px;
-      font-weight: 600; font-size: 11px;
-      letter-spacing: 2px; text-transform: uppercase;
-      cursor: pointer;
-      white-space: nowrap;
-      font-family: var(--sans);
-    }
-    .btn-danger:hover { background: rgba(239,68,68,0.08); }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--surface-3);
-      border: 1px solid var(--accent);
-      padding: 12px 20px;
-      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--accent);
-      opacity: 0;
-      transition: opacity 0.18s, transform 0.18s;
-      pointer-events: none; z-index: 200;
-      font-family: var(--mono);
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar">
-      <a href="cars-list-d-final.html" class="brand" aria-label="Crosslink Motorsports">
-        <svg viewBox="0 0 260 48" aria-hidden="true">
-          <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-            <rect x="3" y="14" width="22" height="20" rx="10"/>
-            <rect x="17" y="14" width="22" height="20" rx="10"/>
-          </g>
-          <text x="50" y="31" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="currentColor">CROSSLINK</text>
-          <text x="50" y="44" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="500" letter-spacing="3" fill="currentColor" opacity="0.6">MOTORSPORTS</text>
-        </svg>
-      </a>
-      <nav class="nav" aria-label="Primary">
-        <a href="cars-list-d-final.html"><span class="ico">▸</span> Fleet</a>
-        <a href="#" data-nav="sessions"><span class="ico">◇</span> Sessions</a>
-        <a href="#" data-nav="reports"><span class="ico">≡</span> Reports</a>
-      </nav>
-      <div class="nav-section">Configure</div>
-      <nav class="nav" aria-label="Configure">
-        <a href="#" data-nav="checks"><span class="ico">∷</span> Check library</a>
-        <a href="#" data-nav="channels"><span class="ico">⌥</span> Channel maps</a>
-        <a href="#" data-nav="cartypes"><span class="ico">◐</span> Car types</a>
-        <a href="team-settings.html" class="active"><span class="ico">⚙</span> Settings</a>
-      </nav>
-      <div class="user-foot">
-        <span class="avatar" id="user-init"></span>
-        <div>
-          <div class="who" id="user-name"></div>
-          <div class="role" id="user-role"></div>
-        </div>
-      </div>
-    </aside>
+    <aside id="sidebar" data-active="settings"></aside>
 
-    <main class="main">
+    <main class="main main--narrow">
       <div class="page-head">
         <div>
           <p class="page-title">Crosslink Motorsports · Workspace</p>
@@ -457,9 +138,7 @@
         </div>
       </div>
 
-      <div class="section-h">
-        <span>Identity</span>
-      </div>
+      <div class="section-h"><span>Identity</span></div>
       <div class="card">
         <div class="body">
           <div class="field">
@@ -513,9 +192,7 @@
         </table>
       </div>
 
-      <div class="section-h">
-        <span>Danger zone</span>
-      </div>
+      <div class="section-h"><span>Danger zone</span></div>
       <div class="danger-card">
         <div class="danger-row">
           <div>
@@ -539,27 +216,12 @@
     </main>
   </div>
 
-  <div class="toast" id="toast"></div>
-
   <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
   <script>
-    const data = window.CROSSLINK;
     const $ = (id) => document.getElementById(id);
 
-    // Sidebar user
-    $('user-name').textContent = data.user.name;
-    $('user-init').textContent = data.user.initials;
-    $('user-role').textContent = data.user.role;
-
-    // Sidebar stubs
-    document.querySelectorAll('.nav a[data-nav]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        toast(`${a.textContent.trim()} — coming next`);
-      });
-    });
-
-    // ---- Members fixtures (page-local; reflects what we'd get from Clerk) ----
+    // Members fixtures (page-local; reflects what we'd get from Clerk)
     const members = [
       { id: 'u_billy', initials: 'BJ', name: 'Billy Smith', title: 'Crew chief',
         email: 'billy.j.smith2@gmail.com', role: 'owner', lastActive: 'today', you: true },
@@ -623,7 +285,7 @@
     }
     renderMembers();
 
-    // ---- Identity dirty-state ----
+    // Identity dirty-state
     const nameInput = $('team-name');
     const ORIG_NAME = nameInput.value;
     let logoDirty = false;
@@ -639,12 +301,12 @@
     $('btn-replace-logo').addEventListener('click', () => {
       logoDirty = true;
       refreshDirty();
-      toast('Replace logo — would open file picker');
+      RCH.toast('Replace logo — would open file picker');
     });
     $('btn-save').addEventListener('click', () => {
       logoDirty = false;
       refreshDirty();
-      toast(`Saved team name as "${nameInput.value.trim()}"`);
+      RCH.toast(`Saved team name as "${nameInput.value.trim()}"`);
     });
     $('btn-discard').addEventListener('click', () => {
       nameInput.value = ORIG_NAME;
@@ -652,11 +314,10 @@
       refreshDirty();
     });
 
-    // ---- Members header actions ----
-    $('btn-invite').addEventListener('click', () => toast('Invite teammates — would open dialog'));
-    $('btn-roles').addEventListener('click', () => toast('Roles & permissions — would open reference'));
+    $('btn-invite').addEventListener('click', () => RCH.toast('Invite teammates — would open dialog'));
+    $('btn-roles').addEventListener('click', () => RCH.toast('Roles & permissions — would open reference'));
 
-    // ---- Kebab menus ----
+    // Kebab menus
     const membersBody = $('members-body');
     function closeAllKebabs(except) {
       membersBody.querySelectorAll('.kebab-menu.open').forEach(m => {
@@ -695,7 +356,7 @@
           'copy-link': `Would copy invite link for ${member.email}`,
           'cancel': `Would cancel invite for ${member.email}`,
         };
-        toast(labels[item.dataset.act] || 'Member action');
+        RCH.toast(labels[item.dataset.act] || 'Member action');
       }
     });
     document.addEventListener('click', (e) => {
@@ -705,19 +366,8 @@
       if (e.key === 'Escape') closeAllKebabs(null);
     });
 
-    // ---- Danger zone ----
-    $('btn-archive-team').addEventListener('click', () => toast('Archive team — would confirm (reversible, read-only)'));
-    $('btn-delete-team').addEventListener('click', () => toast('Delete team — would open multi-step confirm with type-to-confirm'));
-
-    // ---- Toast ----
-    let toastTimer;
-    function toast(msg) {
-      const t = $('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
-    }
+    $('btn-archive-team').addEventListener('click', () => RCH.toast('Archive team — would confirm (reversible, read-only)'));
+    $('btn-delete-team').addEventListener('click', () => RCH.toast('Delete team — would open multi-step confirm with type-to-confirm'));
   </script>
 </body>
 </html>
