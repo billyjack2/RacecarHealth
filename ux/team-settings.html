@@ -98,9 +98,10 @@
     }
     .last-active.dim { color: var(--text-dim); }
 
-    /* Danger zone */
+    /* Danger zone — red top stripe (signature) + red button only.
+       Border softens to default. Matches car-type-detail. */
     .danger-card {
-      border: 1px solid rgba(239,68,68,0.35);
+      border: 1px solid var(--border);
       background: var(--surface);
     }
     .danger-card::before { content: ''; display: block; height: 2px; background: var(--fail); }

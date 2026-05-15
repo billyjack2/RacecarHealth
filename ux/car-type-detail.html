@@ -42,7 +42,7 @@
     .hero-meta .stat { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 
     /* Card chrome */
-    .card { border: 1px solid var(--border); background: var(--surface); }
+    .card { border: 1px solid var(--border); background: var(--surface); position: relative; }
     .card .body { padding: 22px 24px; }
     .card .foot {
       padding: 14px 24px;
@@ -50,7 +50,6 @@
       background: var(--surface-2);
       display: flex; align-items: center; gap: 10px;
     }
-    .card .foot.read { padding: 10px 24px; }
     .card .foot .filler { flex: 1; }
     .card .foot .status {
       font-family: var(--mono); font-size: 10px;
@@ -58,24 +57,41 @@
       color: var(--text-dim);
     }
 
-    /* Read-mode property grid (compact display of editable settings) */
+    /* Identity card — tightened. Edit lives in the top-right corner of
+       the read-mode body so the card doesn't need a foot row when idle. */
+    .card.identity .body { padding: 14px 20px; }
+    .card.identity .body.read { padding-right: 76px; }
+    .card.identity .body.edit { padding: 18px 22px; }
+    .card.identity .edit-corner {
+      position: absolute; top: 10px; right: 10px;
+      padding: 5px 12px;
+      font-size: 10px;
+    }
     .prop-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px 28px;
+      gap: 8px 28px;
     }
     .prop-wide { grid-column: 1 / -1; }
     .prop-label {
       font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
       color: var(--text-dim);
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
     .prop-value {
-      font-size: 14px; color: var(--text);
-      line-height: 1.5;
+      font-size: 13px; color: var(--text);
+      line-height: 1.4;
     }
-    .prop-value.mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0.3px; }
+    .prop-value.mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0.3px; }
     .prop-value.empty { color: var(--text-dim); font-style: italic; }
+    .prop-value.clamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
 
     /* Shared table chrome for channels + checks */
     .table-head {
@@ -223,9 +239,11 @@
       font-style: italic;
     }
 
-    /* Danger zone */
+    /* Danger zone — red top stripe (signature) + red button only.
+       Border softens to default so the card sits in the page hierarchy
+       like any other, not shouting from the side. Matches team-settings. */
     .danger-card {
-      border: 1px solid rgba(239,68,68,0.35);
+      border: 1px solid var(--border);
       background: var(--surface);
     }
     .danger-card::before { content: ''; display: block; height: 2px; background: var(--fail); }
@@ -287,10 +305,11 @@
         </div>
       </section>
 
-      <div class="section-h"><span>Identity</span></div>
-      <div class="card">
-        <!-- Read mode (default): compact display, single Edit button in footer -->
-        <div class="body" id="identity-view">
+      <div class="card identity">
+        <!-- Read mode (default): compact prop grid + corner Edit button.
+             Description is single-line clamped with full text on hover. -->
+        <div class="body read" id="identity-view">
+          <button class="btn-thin edit-corner" id="btn-edit-identity">Edit</button>
           <div class="prop-grid">
             <div class="prop">
               <div class="prop-label">Type name</div>
@@ -298,21 +317,17 @@
             </div>
             <div class="prop">
               <div class="prop-label">Data source</div>
-              <div class="prop-value mono" id="view-source"></div>
+              <div class="prop-value" id="view-source"></div>
             </div>
             <div class="prop prop-wide">
               <div class="prop-label">Description</div>
-              <div class="prop-value" id="view-desc"></div>
+              <div class="prop-value clamp" id="view-desc"></div>
             </div>
           </div>
         </div>
-        <div class="foot read" id="foot-view">
-          <span class="filler"></span>
-          <button class="btn-ghost" id="btn-edit-identity">Edit</button>
-        </div>
 
-        <!-- Edit mode: inputs + Cancel / Save -->
-        <div class="body" id="identity-edit" hidden>
+        <!-- Edit mode: inputs + Cancel / Save in the foot -->
+        <div class="body edit" id="identity-edit" hidden>
           <div class="field">
             <label for="type-name">Type name</label>
             <input id="type-name" type="text" />
@@ -463,7 +478,6 @@
 
     function setEditing(on) {
       $('identity-view').hidden = on;
-      $('foot-view').hidden = on;
       $('identity-edit').hidden = !on;
       $('foot-edit').hidden = !on;
       if (on) setTimeout(() => $('type-name').focus(), 50);
@@ -487,9 +501,11 @@
       const descEl = $('view-desc');
       if (desc) {
         descEl.textContent = desc;
+        descEl.title = desc;
         descEl.classList.remove('empty');
       } else {
         descEl.textContent = 'No description';
+        descEl.removeAttribute('title');
         descEl.classList.add('empty');
       }
     }
