@@ -9,70 +9,54 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/app.css" />
   <style>
-    /* Page-specific: hero, strip, events table columns, setup card */
+    /* Page-specific: hero, events table columns, setup card */
     .hero {
       border: 1px solid var(--border);
       background:
         radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
         var(--surface);
-      padding: 30px 32px;
+      padding: 20px 26px;
       display: grid;
       grid-template-columns: auto 1fr auto;
-      gap: 32px;
+      gap: 28px;
       align-items: center;
-      margin-bottom: 0;
+      margin-bottom: 24px;
     }
     .hero-num {
       font-family: var(--mono);
-      font-size: 96px; font-weight: 700;
-      letter-spacing: -3px; line-height: 0.9;
+      font-size: 72px; font-weight: 700;
+      letter-spacing: -2.5px; line-height: 0.9;
       color: var(--accent);
     }
     .hero-mid h1 {
-      font-size: 36px; font-weight: 700;
-      letter-spacing: -0.5px;
-      margin: 0 0 6px;
+      font-size: 28px; font-weight: 700;
+      letter-spacing: -0.4px;
+      margin: 0 0 4px;
       text-transform: uppercase;
     }
     .hero-mid .type {
-      font-family: var(--mono); font-size: 13px;
+      font-family: var(--mono); font-size: 12px;
       color: var(--text); letter-spacing: 0.5px;
     }
     .hero-mid .driver {
-      font-size: 13px; color: var(--text-muted);
-      margin-top: 6px;
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 4px;
     }
     .hero-trend-wrap { text-align: right; }
     .hero-trend-lbl {
       font-size: 10px; letter-spacing: 2px;
       color: var(--text-dim); text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .hero-trend {
       display: inline-flex; gap: 4px;
-      padding: 10px; border: 1px solid var(--border);
+      padding: 8px; border: 1px solid var(--border);
       background: rgba(0,0,0,0.3);
     }
-    .hero-trend .dot { width: 14px; height: 14px; border-radius: 1px; }
+    .hero-trend .dot { width: 12px; height: 12px; border-radius: 1px; }
     .hero-trend .dot.pass { background: var(--pass); }
     .hero-trend .dot.warn { background: var(--warn); }
     .hero-trend .dot.fail { background: var(--fail); }
-
-    .strip {
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      border: 1px solid var(--border);
-      border-top: 0;
-      background: var(--surface);
-      margin-bottom: 24px;
-    }
-    .strip > div { padding: 14px 20px; border-right: 1px solid var(--border); }
-    .strip > div:last-child { border-right: 0; }
-    .strip .lbl {
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim); margin-bottom: 4px;
-    }
-    .strip .val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
-    .strip .val.fail { color: var(--fail); }
 
     .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
 
@@ -155,17 +139,6 @@
           <div class="hero-trend" id="hero-trend"></div>
         </div>
       </section>
-
-      <div class="strip">
-        <div>
-          <div class="lbl">Recent verdict</div>
-          <div class="val" id="s-recent"></div>
-        </div>
-        <div>
-          <div class="lbl">Failures / 90d</div>
-          <div class="val fail" id="s-fails"></div>
-        </div>
-      </div>
 
       <div class="actions">
         <button class="btn-ghost" id="btn-edit">Edit car</button>
@@ -275,16 +248,7 @@
     const trend = car.eventTrend || car.trend || [];
     $('hero-trend').innerHTML = trend.map(v => `<span class="dot ${v}" title="${v}"></span>`).join('');
 
-    // Strip
     const carEvents = data.events.filter(ev => ev.cars.includes(car.id));
-    const recentVerdict = (trend[trend.length - 1] || car.lastVerdict || 'pass').toUpperCase();
-    const recentEl = $('s-recent');
-    recentEl.textContent = recentVerdict;
-    if (recentVerdict === 'FAIL') recentEl.style.color = 'var(--fail)';
-    else if (recentVerdict === 'WARN') recentEl.style.color = 'var(--warn)';
-    else recentEl.style.color = 'var(--pass)';
-    const fails90 = trend.filter(v => v === 'fail').length;
-    $('s-fails').textContent = String(fails90).padStart(2, '0');
 
     $('setup-type').textContent = car.carType;
     $('setup-driver').textContent = car.driver;

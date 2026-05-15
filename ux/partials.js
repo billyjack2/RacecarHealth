@@ -87,6 +87,27 @@
     });
   }
 
+  // Status ticker — shared signature element. Pages opt in with
+  //   <footer id="ticker" data-atoms="status atom|fact|!1 failure open|@Last sync 14:08 UTC"></footer>
+  // Prefixes: !=fail, @=right-aligned. First atom gets the pulse dot.
+  function mountTicker() {
+    const el = document.getElementById('ticker');
+    if (!el) return;
+    if (!el.classList.contains('ticker')) el.classList.add('ticker');
+    const atomStr = el.dataset.atoms;
+    if (!atomStr) return;
+    const atoms = atomStr.split('|').map(s => s.trim()).filter(Boolean);
+    el.innerHTML = atoms.map((atom, i) => {
+      let text = atom;
+      const classes = [];
+      if (text.startsWith('!')) { classes.push('fail-atom'); text = text.slice(1).trim(); }
+      if (text.startsWith('@')) { classes.push('right'); text = text.slice(1).trim(); }
+      if (i === 0 && !classes.includes('fail-atom')) classes.push('blink');
+      const cls = classes.length ? ` class="${classes.join(' ')}"` : '';
+      return `<span${cls}>${text}</span>`;
+    }).join('');
+  }
+
   function ensureToastEl() {
     let el = document.getElementById('toast');
     if (!el) {
@@ -109,11 +130,13 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
   }
 
-  window.RCH = { mountSidebar, toast };
+  function mountAll() { mountSidebar(); mountTicker(); }
+
+  window.RCH = { mountSidebar, mountTicker, toast };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountSidebar);
+    document.addEventListener('DOMContentLoaded', mountAll);
   } else {
-    mountSidebar();
+    mountAll();
   }
 })();
