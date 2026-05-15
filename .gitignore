@@ -3,20 +3,21 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+# Distribution / packaging (scoped to repo root so they don't match
+# subdirectories like apps/web/lib/)
+/.Python
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
+/wheels/
 *.egg-info/
 *.egg
 
@@ -52,6 +53,31 @@ uploads/
 *.csv
 *.ld
 *.ldx
+
+# Node / Next.js / pnpm
+node_modules/
+.pnpm-store/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Vercel
+.vercel/
+
+# Turborepo
+.turbo/
+
+# Drizzle
+# (generated SQL migrations under drizzle/ ARE committed; this catches
+# only the local snapshot Drizzle writes during introspection)
+drizzle/.snapshot*.json
 
 # Secrets / env
 .env
