@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/app.css" />
   <style>
     /* Page-specific: card chrome, members table cells, danger zone */
-    .card { border: 1px solid var(--border); background: var(--surface); }
+    .card { border: 1px solid var(--border); background: var(--surface); position: relative; }
     .card .body { padding: 22px 24px; }
     .card .foot {
       padding: 14px 24px;
@@ -24,6 +24,51 @@
       letter-spacing: 1.5px; text-transform: uppercase;
       color: var(--text-dim);
     }
+
+    /* Identity card — matches car-type-detail. Read-mode by default with
+       Edit in the top-right corner; edit-mode swaps inputs in and shows
+       Save/Discard in the foot. */
+    .card.identity .body { padding: 14px 20px; }
+    .card.identity .body.read { padding-right: 76px; }
+    .card.identity .body.edit { padding: 18px 22px; }
+    .card.identity .edit-corner {
+      position: absolute; top: 10px; right: 10px;
+      padding: 5px 12px;
+      font-size: 10px;
+    }
+    .prop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 28px;
+      align-items: center;
+    }
+    .prop-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+    }
+    .prop-value {
+      font-size: 13px; color: var(--text);
+      line-height: 1.4;
+    }
+    .prop-logo {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .prop-logo .thumb {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      display: grid; place-items: center;
+      overflow: hidden;
+    }
+    .prop-logo .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .prop-logo .thumb.empty {
+      background: var(--inset);
+      color: var(--text-dim);
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .prop-logo .lbl { font-size: 13px; color: var(--text); }
 
     /* Members table */
     .members-head {
@@ -139,9 +184,27 @@
         </div>
       </div>
 
-      <div class="section-h"><span>Identity</span></div>
-      <div class="card">
-        <div class="body">
+      <div class="card identity">
+        <!-- Read mode (default): compact prop grid + corner Edit button. -->
+        <div class="body read" id="identity-view">
+          <button class="btn-thin edit-corner" id="btn-edit-identity">Edit</button>
+          <div class="prop-grid">
+            <div class="prop">
+              <div class="prop-label">Team name</div>
+              <div class="prop-value" id="view-name">Crosslink Motorsports</div>
+            </div>
+            <div class="prop">
+              <div class="prop-label">Team logo</div>
+              <div class="prop-logo" id="view-logo">
+                <span class="thumb"><img src="assets/logo-crosslink.png" alt="" /></span>
+                <span class="lbl">Custom logo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit mode: inputs + Cancel / Save in the foot -->
+        <div class="body edit" id="identity-edit" hidden>
           <div class="field">
             <label for="team-name">Team name</label>
             <input id="team-name" type="text" value="Crosslink Motorsports" autocomplete="organization" />
@@ -160,10 +223,10 @@
             </div>
           </div>
         </div>
-        <div class="foot">
+        <div class="foot" id="foot-edit" hidden>
           <span class="status" id="identity-status">No unsaved changes</span>
           <span class="filler"></span>
-          <button class="btn-ghost" id="btn-discard" disabled>Discard</button>
+          <button class="btn-ghost" id="btn-cancel">Cancel</button>
           <button class="btn" id="btn-save" disabled>Save changes</button>
         </div>
       </div>
@@ -286,33 +349,51 @@
     }
     renderMembers();
 
-    // Identity dirty-state
+    // Identity — read-mode by default, Edit toggles to inputs.
     const nameInput = $('team-name');
-    const ORIG_NAME = nameInput.value;
+    let originalName = nameInput.value;
     let logoDirty = false;
     function refreshDirty() {
-      const dirty = nameInput.value.trim() !== ORIG_NAME || logoDirty;
+      const dirty = nameInput.value.trim() !== originalName || logoDirty;
       $('btn-save').disabled = !dirty || nameInput.value.trim() === '';
-      $('btn-discard').disabled = !dirty;
       $('identity-status').textContent = dirty ? 'Unsaved changes' : 'No unsaved changes';
       $('identity-status').style.color = dirty ? 'var(--accent)' : 'var(--text-dim)';
     }
+    function setEditing(on) {
+      $('identity-view').hidden = on;
+      $('identity-edit').hidden = !on;
+      $('foot-edit').hidden = !on;
+      if (on) setTimeout(() => nameInput.focus(), 50);
+    }
     nameInput.addEventListener('input', refreshDirty);
 
+    $('btn-edit-identity').addEventListener('click', () => setEditing(true));
+    $('btn-cancel').addEventListener('click', () => {
+      nameInput.value = originalName;
+      logoDirty = false;
+      refreshDirty();
+      setEditing(false);
+    });
     $('btn-replace-logo').addEventListener('click', () => {
       logoDirty = true;
       refreshDirty();
       RCH.toast('Replace logo — would open file picker');
     });
     $('btn-save').addEventListener('click', () => {
+      originalName = nameInput.value.trim();
       logoDirty = false;
+      $('view-name').textContent = originalName;
       refreshDirty();
-      RCH.toast(`Saved team name as "${nameInput.value.trim()}"`);
+      setEditing(false);
+      RCH.toast(`Saved team name as "${originalName}"`);
     });
-    $('btn-discard').addEventListener('click', () => {
-      nameInput.value = ORIG_NAME;
-      logoDirty = false;
-      refreshDirty();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !$('identity-edit').hidden) {
+        nameInput.value = originalName;
+        logoDirty = false;
+        refreshDirty();
+        setEditing(false);
+      }
     });
 
     $('btn-invite').addEventListener('click', () => RCH.toast('Invite teammates — would open dialog'));
