@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fleet · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: cars table columns */
+
+    /* Fleet kicker — team + factual count. Status framing (e.g. "1 needs
+       attention") removed pending user research on what's actually useful. */
+    .fleet-kicker {
+      display: flex; align-items: baseline; gap: 12px;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted); margin: 0 0 6px;
+    }
+    .fleet-kicker .team { color: var(--text); }
+    .fleet-kicker .sep { color: var(--text-dim); }
+
+    /* Cars table */
+    table.cars { width: 100%; border-collapse: collapse; }
+    table.cars thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      user-select: none;
+    }
+    table.cars tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-rule);
+      vertical-align: middle;
+    }
+    table.cars tbody tr { transition: background 0.08s; }
+    table.cars tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+    table.cars tbody tr:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+    table.cars tbody tr:last-child td { border-bottom: 0; }
+    /* Quieter row-level focus — the loud cyan ring on a 60-px row is too much. */
+    table.cars tbody tr[tabindex]:focus-visible {
+      outline: 1px solid var(--accent); outline-offset: -1px;
+      background: var(--surface-2);
+    }
+
+    .car-num {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      width: 64px;
+      font-variant-numeric: tabular-nums;
+    }
+    .car-name { font-weight: 600; font-size: 15px; }
+    .car-meta {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 3px;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .car-meta .car-type {
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+    .car-meta .car-type::before {
+      content: ''; display: inline-block;
+      width: 3px; height: 3px;
+      background: var(--text-dim);
+      margin-right: 8px; vertical-align: 2px;
+    }
+    .last-event { font-size: 13px; }
+    .last-event .track { font-weight: 500; }
+    .last-event .dates {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .last-event .kind {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .last-upload {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1.2px; text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    /* Trend dots on Fleet are visual-only — no per-dot navigation until
+       per-session pages exist. They still convey history at a glance. */
+    .cars .trend .dot {
+      cursor: default;
+      width: 10px; height: 10px;
+    }
+
+    /* Search input — flexes to available space so chips can wrap cleanly. */
+    .toolbar .search-wrap { margin-left: auto; }
+    .toolbar .search { flex-basis: 280px; min-width: 180px; max-width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="fleet"></aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <p class="fleet-kicker">
+            <span class="team" id="kicker-team"></span>
+            <span class="sep">·</span>
+            <span id="kicker-count"></span>
+          </p>
+          <h1 class="page-h1">Fleet</h1>
+        </div>
+        <div class="head-actions" style="display:flex; gap:8px;">
+          <button class="btn btn-ghost" id="btn-import">Import CSV</button>
+          <button class="btn" id="btn-add">+ Add car</button>
+        </div>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter cars">
+        <button class="chip active" data-filter="all">All <span class="ct" id="ct-all">5</span></button>
+        <button class="chip" data-filter="Spec Miata">Spec Miata <span class="ct">2</span></button>
+        <button class="chip" data-filter="Radical SR3">Radical SR3 <span class="ct">1</span></button>
+        <button class="chip" data-filter="LMP3">LMP3 <span class="ct">1</span></button>
+        <button class="chip" data-filter="GT4 Cayman">GT4 Cayman <span class="ct">1</span></button>
+        <div class="search-wrap">
+          <span class="search-ico">⌕</span>
+          <input class="search" id="search" placeholder="Search car, driver, track…" aria-label="Search" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="cars" aria-label="Cars in fleet">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Car</th>
+              <th class="sortable" data-sort="lastEventDate">Last event <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="lastVerdict">Verdict <span class="arrow">↓</span></th>
+              <th>Trend</th>
+              <th style="text-align:right;">Last upload</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cars-body"></tbody>
+        </table>
+        <div class="empty" id="empty-matches" style="display:none;">
+          <div class="head">No matches</div>
+          <div class="sub">Try a different filter or search.</div>
+          <button class="clear" id="clear-filters">Clear filters</button>
+        </div>
+        <div class="empty" id="empty-cars" style="display:none;">
+          <div class="head">No cars yet</div>
+          <div class="sub">Add your first car or import a GEMS session to populate the fleet.</div>
+          <button class="clear" id="cta-add-first">+ Add your first car</button>
+        </div>
+      </div>
+
+      <footer id="ticker" data-atoms=""></footer>
+    </main>
+  </div>
+
+  <!-- Stub modal -->
+  <div class="modal-mask" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-h">
+    <div class="modal">
+      <div class="modal-h" id="modal-kicker">Add car</div>
+      <h2 id="modal-h">New car</h2>
+      <p id="modal-desc">A car is an instance of a car type. The checks and channels come from the type — you can override per car later.</p>
+      <div class="field">
+        <label for="m-number">Car number</label>
+        <input id="m-number" type="text" placeholder="e.g. 43" />
+      </div>
+      <div class="field">
+        <label for="m-name">Name</label>
+        <input id="m-name" type="text" placeholder="e.g. Apex" />
+      </div>
+      <div class="field">
+        <label for="m-type">Car type</label>
+        <select id="m-type">
+          <option>Spec Miata</option>
+          <option>Radical SR3</option>
+          <option>LMP3</option>
+          <option>GT4 Cayman</option>
+          <option>+ New car type…</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+        <button class="btn" id="modal-confirm">Create car</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    // Defensive fallbacks for stale data.js cache
+    data.events = data.events || [];
+    data.cars = data.cars.map(c => ({
+      ...c,
+      lastEvent: c.lastEvent || {
+        id: c.id + '_fallback',
+        name: c.lastSessionTrack,
+        track: c.lastSessionTrack,
+        startDate: c.lastSessionAt,
+        endDate: c.lastSessionAt,
+        kind: 'Test day',
+        sessionsCount: 1,
+        verdict: c.lastVerdict,
+      },
+      eventTrend: c.eventTrend || c.trend || [c.lastVerdict],
+    }));
+
+    // ----- Page-head kicker -----
+    $('kicker-team').textContent = data.team.name;
+    $('kicker-count').textContent = `${data.cars.length} cars`;
+
+    // ----- Date helpers -----
+    const today = new Date('2026-05-14');
+    const fmtAge = (iso) => {
+      const days = Math.round((today - new Date(iso)) / 86400000);
+      if (days === 0) return 'TODAY';
+      if (days === 1) return 'YESTERDAY';
+      if (days < 7) return `${days}D AGO`;
+      if (days < 30) return `${Math.round(days / 7)}W AGO`;
+      return `${Math.round(days / 30)}MO AGO`;
+    };
+
+    // ----- Status ticker -----
+    const tickerEl = $('ticker');
+    const atoms = [
+      'Status nominal',
+      `${data.cars.length} cars`,
+      `${data.team.sessionsThisWeek} sessions / 30d`,
+      '@Last sync 14:08 UTC',
+    ];
+    tickerEl.dataset.atoms = atoms.join('|');
+    if (window.RCH && RCH.mountTicker) RCH.mountTicker();
+
+    // Filter chip counts
+    document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+      const type = chip.dataset.filter;
+      const ct = chip.querySelector('.ct');
+      if (!ct) return;
+      const n = type === 'all' ? data.cars.length : data.cars.filter(c => c.carType === type).length;
+      ct.textContent = n;
+    });
+
+    // ----- State -----
+    const state = { filter: 'all', query: '', sortKey: 'lastEventDate', sortDir: 'desc' };
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', opts).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric' })}`;
+    };
+
+    const verdictRank = { fail: 3, warn: 2, pass: 1 };
+
+    function applySort(rows) {
+      const key = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
+      return [...rows].sort((a, b) => {
+        let av, bv;
+        if (key === 'lastEventDate') {
+          av = new Date(a.lastEvent.startDate).getTime();
+          bv = new Date(b.lastEvent.startDate).getTime();
+        } else if (key === 'lastVerdict') {
+          av = verdictRank[a.lastEvent.verdict];
+          bv = verdictRank[b.lastEvent.verdict];
+        } else {
+          av = a[key]; bv = b[key];
+        }
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      });
+    }
+
+    function applyFilter(rows) {
+      const q = state.query.trim().toLowerCase();
+      return rows.filter(c => {
+        if (state.filter !== 'all' && c.carType !== state.filter) return false;
+        if (!q) return true;
+        return (
+          c.name.toLowerCase().includes(q) ||
+          c.number.toLowerCase().includes(q) ||
+          c.driver.toLowerCase().includes(q) ||
+          c.carType.toLowerCase().includes(q) ||
+          c.lastEvent.track.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function trendTooltip(trend) {
+      const counts = trend.reduce((acc, v) => (acc[v] = (acc[v] || 0) + 1, acc), {});
+      const parts = [];
+      if (counts.pass) parts.push(`${counts.pass} pass`);
+      if (counts.warn) parts.push(`${counts.warn} warn`);
+      if (counts.fail) parts.push(`${counts.fail} fail`);
+      return `Last ${trend.length} events · ${parts.join(' · ')}`;
+    }
+
+    function render() {
+      const rows = applySort(applyFilter(data.cars));
+      const body = $('cars-body');
+      const emptyMatches = $('empty-matches');
+      const emptyCars = $('empty-cars');
+
+      if (data.cars.length === 0) {
+        body.innerHTML = '';
+        emptyMatches.style.display = 'none';
+        emptyCars.style.display = '';
+        return;
+      }
+      if (rows.length === 0) {
+        body.innerHTML = '';
+        emptyMatches.style.display = '';
+        emptyCars.style.display = 'none';
+        return;
+      }
+      emptyMatches.style.display = 'none';
+      emptyCars.style.display = 'none';
+
+      body.innerHTML = rows.map(c => `
+        <tr tabindex="0" data-id="${c.id}">
+          <td class="car-num">${c.number}</td>
+          <td>
+            <div class="car-name">${c.name}</div>
+            <div class="car-meta">${c.driver}<span class="car-type">${c.carType}</span></div>
+          </td>
+          <td class="last-event">
+            <div class="track">${c.lastEvent.track}</div>
+            <div class="dates">${fmtRange(c.lastEvent.startDate, c.lastEvent.endDate)}</div>
+            <div class="kind">${c.lastEvent.kind || ''} · ${c.lastEvent.sessionsCount} stints</div>
+          </td>
+          <td><span class="verdict ${c.lastEvent.verdict}">${c.lastEvent.verdict}</span></td>
+          <td>
+            <div class="trend" aria-label="${trendTooltip(c.eventTrend)}">
+              ${c.eventTrend.map((v, i) => `<span class="dot ${v}" aria-hidden="true"></span>`).join('')}
+              <span class="trend-tooltip">${trendTooltip(c.eventTrend)}</span>
+            </div>
+          </td>
+          <td class="last-upload">${fmtAge(c.lastSessionAt || c.lastEvent.startDate)}</td>
+          <td style="text-align:right;"><span class="arrow-end">→</span></td>
+        </tr>
+      `).join('');
+
+      // Sort indicators
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const k = th.dataset.sort;
+        th.classList.toggle('sorted', k === state.sortKey);
+        const arr = th.querySelector('.arrow');
+        if (arr) arr.textContent = state.sortDir === 'asc' ? '↑' : '↓';
+      });
+    }
+
+    // ----- Filters -----
+    document.querySelectorAll('.chip[data-filter]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        state.filter = chip.dataset.filter;
+        render();
+      });
+    });
+
+    $('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+
+    // ----- Sort -----
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.sort;
+        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        else { state.sortKey = k; state.sortDir = 'desc'; }
+        render();
+      });
+    });
+
+    // ----- Row clicks -----
+    // Trend dots are visual-only on Fleet — per-session navigation lives on
+    // car-detail. Row click always goes to the car's detail page.
+    document.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-id]');
+      if (tr) {
+        const car = data.cars.find(c => c.id === tr.dataset.id);
+        location.href = `car-detail.html?id=${car.id}`;
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const tr = e.target.closest && e.target.closest('tr[data-id]');
+      if (tr) {
+        const car = data.cars.find(c => c.id === tr.dataset.id);
+        location.href = `car-detail.html?id=${car.id}`;
+      }
+    });
+
+    // ----- Clear filters -----
+    $('clear-filters').addEventListener('click', () => {
+      state.filter = 'all'; state.query = '';
+      $('search').value = '';
+      document.querySelectorAll('.chip[data-filter]').forEach(c =>
+        c.classList.toggle('active', c.dataset.filter === 'all')
+      );
+      render();
+    });
+    $('cta-add-first').addEventListener('click', () => openModal('add'));
+
+    // ----- Modal -----
+    const modal = $('modal');
+    function openModal(kind) {
+      if (kind === 'import') {
+        $('modal-kicker').textContent = 'Import session';
+        $('modal-h').textContent = 'Import CSV';
+        $('modal-desc').textContent = 'Drop a GEMS CSV. Files bucket into sessions by time-gap; sessions bucket into events by track + date range.';
+      } else {
+        $('modal-kicker').textContent = 'Add car';
+        $('modal-h').textContent = 'New car';
+        $('modal-desc').textContent = 'A car is an instance of a car type. Checks and channels come from the type — you can override per car later.';
+      }
+      modal.classList.add('open');
+      setTimeout(() => $('m-number').focus(), 50);
+    }
+    function closeModal() { modal.classList.remove('open'); }
+
+    $('btn-add').addEventListener('click', () => openModal('add'));
+    $('btn-import').addEventListener('click', () => openModal('import'));
+    $('modal-cancel').addEventListener('click', closeModal);
+    $('modal-confirm').addEventListener('click', () => { closeModal(); RCH.toast('Would create car — wired up later'); });
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    render();
+  </script>
+</body>
+</html>

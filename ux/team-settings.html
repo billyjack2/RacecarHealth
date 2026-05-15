@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: card chrome, members table cells, danger zone */
+    .card { border: 1px solid var(--border); background: var(--surface); }
+    .card .body { padding: 22px 24px; }
+    .card .foot {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card .foot .filler { flex: 1; }
+    .card .foot .status {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* Members table */
+    .members-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .members-head .filler { flex: 1; }
+    .members-head .summary {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); letter-spacing: 1px;
+    }
+    table.members { width: 100%; border-collapse: collapse; }
+    table.members thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    table.members tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.members tbody tr:last-child td { border-bottom: 0; }
+    table.members tbody tr:hover { background: var(--surface-2); }
+
+    .member-cell { display: flex; align-items: center; gap: 12px; }
+    .member-avatar {
+      width: 32px; height: 32px;
+      background: var(--surface-3);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      display: grid; place-items: center;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .member-avatar.you {
+      background: var(--accent); color: #0a0b0d;
+      border-color: var(--accent);
+    }
+    .member-name { font-weight: 600; font-size: 14px; }
+    .member-name .you-tag {
+      margin-left: 6px;
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent);
+      padding: 1px 6px;
+      border: 1px solid var(--accent);
+    }
+    .member-title { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .member-email { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .role-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid currentColor;
+    }
+    .role-pill.owner { color: var(--accent); }
+    .role-pill.admin { color: var(--text); }
+    .role-pill.member { color: var(--text-muted); }
+    .role-pill.pending { color: var(--warn); border-style: dashed; }
+
+    .last-active {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .last-active.dim { color: var(--text-dim); }
+
+    /* Danger zone — red top stripe (signature) + red button only.
+       Border softens to default. Matches car-type-detail. */
+    .danger-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .danger-card::before { content: ''; display: block; height: 2px; background: var(--fail); }
+    .danger-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .danger-row:last-child { border-bottom: 0; }
+    .danger-row .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .danger-row .desc {
+      font-size: 12px; color: var(--text-muted);
+      max-width: 60ch; line-height: 1.5;
+    }
+    .danger-row .desc .em {
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="settings"></aside>
+
+    <main class="main main--narrow">
+      <div class="page-head">
+        <div>
+          <p class="page-title">Crosslink Motorsports · Workspace</p>
+          <h1 class="page-h1">Settings</h1>
+        </div>
+      </div>
+
+      <div class="section-h"><span>Identity</span></div>
+      <div class="card">
+        <div class="body">
+          <div class="field">
+            <label for="team-name">Team name</label>
+            <input id="team-name" type="text" value="Crosslink Motorsports" autocomplete="organization" />
+          </div>
+          <div class="field">
+            <label>Team logo <span class="opt">used in headers and exported reports</span></label>
+            <div class="logo-row">
+              <div class="logo-preview has-image" id="logo-preview" aria-hidden="true">
+                <img src="assets/logo-crosslink.png" alt="Team logo preview" />
+              </div>
+              <div class="logo-hint">
+                Drop a new file to replace the current logo.
+                <span class="mono">SVG, PNG, or JPG · ≤ 1MB</span>
+              </div>
+              <button type="button" class="btn-thin" id="btn-replace-logo">Replace</button>
+            </div>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="status" id="identity-status">No unsaved changes</span>
+          <span class="filler"></span>
+          <button class="btn-ghost" id="btn-discard" disabled>Discard</button>
+          <button class="btn" id="btn-save" disabled>Save changes</button>
+        </div>
+      </div>
+
+      <div class="section-h">
+        <span>Members</span>
+        <span class="count" id="member-count"></span>
+      </div>
+      <div class="card">
+        <div class="members-head">
+          <span class="summary" id="members-summary"></span>
+          <span class="filler"></span>
+          <button class="btn-thin" id="btn-roles">Roles &amp; permissions</button>
+          <button class="btn" id="btn-invite">+ Invite teammates</button>
+        </div>
+        <table class="members" aria-label="Team members">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Last active</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="members-body"></tbody>
+        </table>
+      </div>
+
+      <div class="section-h"><span>Danger zone</span></div>
+      <div class="danger-card">
+        <div class="danger-row">
+          <div>
+            <div class="title">Archive team</div>
+            <div class="desc">
+              Puts the team into <span class="em">read-only</span> mode. Cars, sessions, and reports stay visible but no new uploads or check runs will run. Reversible at any time.
+            </div>
+          </div>
+          <button class="btn-danger" id="btn-archive-team">Archive team</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <div class="title">Delete team</div>
+            <div class="desc">
+              Permanently removes the team, all cars, all sessions, all uploaded files, and all reports. <span class="em">This cannot be undone.</span> A 7-day grace window applies before data is purged.
+            </div>
+          </div>
+          <button class="btn-danger" id="btn-delete-team">Delete team…</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // Members fixtures (page-local; reflects what we'd get from Clerk)
+    const members = [
+      { id: 'u_billy', initials: 'BJ', name: 'Billy Smith', title: 'Crew chief',
+        email: 'billy.j.smith2@gmail.com', role: 'owner', lastActive: 'today', you: true },
+      { id: 'u_alex', initials: 'AR', name: 'Alex Reyes', title: 'Race engineer',
+        email: 'alex.reyes@crosslink.race', role: 'admin', lastActive: 'today' },
+      { id: 'u_marcos', initials: 'MD', name: 'Marcos Diaz', title: 'Driver · #43 Apex',
+        email: 'm.diaz@crosslink.race', role: 'member', lastActive: '2d ago' },
+      { id: 'u_lin', initials: 'LC', name: 'Lin Chen', title: 'Driver · #99 Echo',
+        email: 'lin.chen@crosslink.race', role: 'member', lastActive: '2w ago' },
+      { id: 'u_tomas', initials: 'TP', name: 'Tomas Park', title: 'Mechanic',
+        email: 't.park@crosslink.race', role: 'pending', lastActive: 'invite sent · 3d ago' },
+    ];
+
+    function renderMembers() {
+      const body = $('members-body');
+      body.innerHTML = members.map(m => {
+        const isYou = !!m.you;
+        const isPending = m.role === 'pending';
+        const lastDim = isPending ? 'dim' : '';
+        return `
+          <tr data-member="${m.id}">
+            <td>
+              <div class="member-cell">
+                <span class="member-avatar ${isYou ? 'you' : ''}">${m.initials}</span>
+                <div>
+                  <div class="member-name">${m.name}${isYou ? '<span class="you-tag">You</span>' : ''}</div>
+                  <div class="member-title">${m.title}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="member-email">${m.email}</span></td>
+            <td><span class="role-pill ${m.role}">${m.role}</span></td>
+            <td><span class="last-active ${lastDim}">${m.lastActive}</span></td>
+            <td style="text-align:right;">
+              <div class="kebab-wrap">
+                <button class="kebab-btn" data-kebab="${m.id}" aria-label="Member actions" aria-haspopup="menu" aria-expanded="false" ${isYou ? 'disabled' : ''}>⋯</button>
+                <div class="kebab-menu" role="menu" data-kebab-menu="${m.id}">
+                  ${isPending ? `
+                    <button data-act="resend" data-id="${m.id}" role="menuitem">Resend invite</button>
+                    <button data-act="copy-link" data-id="${m.id}" role="menuitem">Copy invite link</button>
+                    <div class="sep" role="separator"></div>
+                    <button data-act="cancel" data-id="${m.id}" class="danger" role="menuitem">Cancel invite</button>
+                  ` : `
+                    <div class="group-label">Change role</div>
+                    <button data-act="role-admin" data-id="${m.id}" role="menuitem">Set as Admin</button>
+                    <button data-act="role-member" data-id="${m.id}" role="menuitem">Set as Member</button>
+                    <div class="sep" role="separator"></div>
+                    <button data-act="remove" data-id="${m.id}" class="danger" role="menuitem">Remove from team</button>
+                  `}
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const active = members.filter(m => m.role !== 'pending').length;
+      const pending = members.length - active;
+      $('member-count').textContent = `${active} active${pending ? ` · ${pending} pending` : ''}`;
+      $('members-summary').textContent = `${active} active member${active === 1 ? '' : 's'}${pending ? `, ${pending} pending invite${pending === 1 ? '' : 's'}` : ''}`;
+    }
+    renderMembers();
+
+    // Identity dirty-state
+    const nameInput = $('team-name');
+    const ORIG_NAME = nameInput.value;
+    let logoDirty = false;
+    function refreshDirty() {
+      const dirty = nameInput.value.trim() !== ORIG_NAME || logoDirty;
+      $('btn-save').disabled = !dirty || nameInput.value.trim() === '';
+      $('btn-discard').disabled = !dirty;
+      $('identity-status').textContent = dirty ? 'Unsaved changes' : 'No unsaved changes';
+      $('identity-status').style.color = dirty ? 'var(--accent)' : 'var(--text-dim)';
+    }
+    nameInput.addEventListener('input', refreshDirty);
+
+    $('btn-replace-logo').addEventListener('click', () => {
+      logoDirty = true;
+      refreshDirty();
+      RCH.toast('Replace logo — would open file picker');
+    });
+    $('btn-save').addEventListener('click', () => {
+      logoDirty = false;
+      refreshDirty();
+      RCH.toast(`Saved team name as "${nameInput.value.trim()}"`);
+    });
+    $('btn-discard').addEventListener('click', () => {
+      nameInput.value = ORIG_NAME;
+      logoDirty = false;
+      refreshDirty();
+    });
+
+    $('btn-invite').addEventListener('click', () => RCH.toast('Invite teammates — would open dialog'));
+    $('btn-roles').addEventListener('click', () => RCH.toast('Roles & permissions — would open reference'));
+
+    // Kebab menus
+    const membersBody = $('members-body');
+    function closeAllKebabs(except) {
+      membersBody.querySelectorAll('.kebab-menu.open').forEach(m => {
+        if (m === except) return;
+        m.classList.remove('open');
+        const btn = m.parentElement.querySelector('.kebab-btn');
+        if (btn) {
+          btn.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+    membersBody.addEventListener('click', (e) => {
+      const kebab = e.target.closest('.kebab-btn[data-kebab]');
+      if (kebab && !kebab.disabled) {
+        e.stopPropagation();
+        const id = kebab.dataset.kebab;
+        const menu = membersBody.querySelector(`.kebab-menu[data-kebab-menu="${id}"]`);
+        const willOpen = !menu.classList.contains('open');
+        closeAllKebabs(menu);
+        menu.classList.toggle('open', willOpen);
+        kebab.classList.toggle('open', willOpen);
+        kebab.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        return;
+      }
+      const item = e.target.closest('.kebab-menu button[data-act]');
+      if (item) {
+        e.stopPropagation();
+        closeAllKebabs(null);
+        const member = members.find(m => m.id === item.dataset.id);
+        const labels = {
+          'role-admin': `Would set ${member.name} as Admin`,
+          'role-member': `Would set ${member.name} as Member`,
+          'remove': `Would remove ${member.name} from the team`,
+          'resend': `Would resend invite to ${member.email}`,
+          'copy-link': `Would copy invite link for ${member.email}`,
+          'cancel': `Would cancel invite for ${member.email}`,
+        };
+        RCH.toast(labels[item.dataset.act] || 'Member action');
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.kebab-wrap')) closeAllKebabs(null);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllKebabs(null);
+    });
+
+    $('btn-archive-team').addEventListener('click', () => RCH.toast('Archive team — would confirm (reversible, read-only)'));
+    $('btn-delete-team').addEventListener('click', () => RCH.toast('Delete team — would open multi-step confirm with type-to-confirm'));
+  </script>
+</body>
+</html>

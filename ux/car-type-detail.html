@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car type · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: hero, channels + checks tables, cars-of-this-type, danger zone */
+
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
+        var(--surface);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: 32px; font-weight: 700;
+      letter-spacing: -0.5px; margin: 0 0 6px;
+      text-transform: uppercase;
+    }
+    .hero .desc {
+      font-size: 13px; color: var(--text-muted);
+      max-width: 60ch; line-height: 1.5;
+    }
+    .hero-meta {
+      display: flex; gap: 18px; align-items: center;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .hero-meta .v { color: var(--text); font-size: 18px; font-weight: 500; }
+    .hero-meta .stat { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+
+    /* Card chrome */
+    .card { border: 1px solid var(--border); background: var(--surface); position: relative; }
+    .card .body { padding: 22px 24px; }
+    .card .foot {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card .foot .filler { flex: 1; }
+    .card .foot .status {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* Identity card — tightened. Edit lives in the top-right corner of
+       the read-mode body so the card doesn't need a foot row when idle. */
+    .card.identity .body { padding: 14px 20px; }
+    .card.identity .body.read { padding-right: 76px; }
+    .card.identity .body.edit { padding: 18px 22px; }
+    .card.identity .edit-corner {
+      position: absolute; top: 10px; right: 10px;
+      padding: 5px 12px;
+      font-size: 10px;
+    }
+    .prop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 28px;
+    }
+    .prop-wide { grid-column: 1 / -1; }
+    .prop-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+    }
+    .prop-value {
+      font-size: 13px; color: var(--text);
+      line-height: 1.4;
+    }
+    .prop-value.mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0.3px; }
+    .prop-value.empty { color: var(--text-dim); font-style: italic; }
+    .prop-value.clamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
+
+    /* Shared table chrome for channels + checks */
+    .table-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-head .summary {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); letter-spacing: 1px;
+    }
+    .table-head .filler { flex: 1; }
+
+    table.tt { width: 100%; border-collapse: collapse; }
+    table.tt thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    table.tt tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.tt tbody tr:last-child td { border-bottom: 0; }
+    table.tt tbody tr:hover { background: var(--surface-2); }
+
+    .canonical {
+      font-family: var(--mono); font-size: 13px;
+      font-weight: 600; color: var(--text);
+      letter-spacing: 0.3px;
+    }
+    .csv-col {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+    .unit {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted);
+    }
+    .rate {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+    .source-pill {
+      display: inline-flex; align-items: center;
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid currentColor;
+      font-weight: 600;
+    }
+    .source-pill.global { color: var(--text-dim); }
+    .source-pill.team { color: var(--accent); }
+
+    .check-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .check-expr {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      letter-spacing: 0.3px;
+    }
+    .tier-pill {
+      display: inline-flex; align-items: center;
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .severity-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid currentColor;
+      font-weight: 600;
+    }
+    .severity-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+    .severity-pill.fail { color: var(--fail); }
+    .severity-pill.warn { color: var(--warn); }
+
+    .toggle {
+      width: 32px; height: 18px;
+      background: var(--surface-3);
+      border: 1px solid var(--border-strong);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      background: var(--text-dim);
+      transition: transform 0.12s, background 0.12s;
+    }
+    .toggle.on { background: var(--accent-dim); border-color: var(--accent); }
+    .toggle.on::after { transform: translateX(14px); background: var(--accent); }
+
+    /* Cars-of-this-type */
+    .cars-of-type {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 18px 24px;
+    }
+    .car-chip {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 14px 8px 10px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .car-chip:hover {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+    .car-chip .num {
+      font-family: var(--mono); font-size: 16px;
+      font-weight: 700; color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .car-chip .meta { font-size: 12px; }
+    .car-chip .meta .name { font-weight: 600; }
+    .car-chip .meta .driver {
+      font-size: 11px; color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .cars-empty {
+      padding: 24px;
+      font-size: 13px; color: var(--text-muted);
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* Danger zone — red top stripe (signature) + red button only.
+       Border softens to default so the card sits in the page hierarchy
+       like any other, not shouting from the side. Matches team-settings. */
+    .danger-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .danger-card::before { content: ''; display: block; height: 2px; background: var(--fail); }
+    .danger-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .danger-row:last-child { border-bottom: 0; }
+    .danger-row .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .danger-row .desc {
+      font-size: 12px; color: var(--text-muted);
+      max-width: 60ch; line-height: 1.5;
+    }
+    .danger-row .desc .em {
+      color: var(--text); font-family: var(--mono);
+      font-size: 11px; letter-spacing: 0.5px;
+    }
+    .danger-row .blocked {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--fail);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="cartypes"></aside>
+
+    <main class="main main--narrow">
+      <div class="crumbs">
+        <a href="car-types.html">Car types</a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-name"></span>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h1 id="hero-name"></h1>
+          <div class="desc" id="hero-desc"></div>
+        </div>
+        <div class="hero-meta">
+          <div class="stat">
+            <span class="v" id="hero-cars"></span>
+            <span>Cars</span>
+          </div>
+          <div class="stat">
+            <span class="v" id="hero-channels"></span>
+            <span>Channels</span>
+          </div>
+          <div class="stat">
+            <span class="v" id="hero-checks"></span>
+            <span>Checks</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="card identity">
+        <!-- Read mode (default): compact prop grid + corner Edit button.
+             Description is single-line clamped with full text on hover. -->
+        <div class="body read" id="identity-view">
+          <button class="btn-thin edit-corner" id="btn-edit-identity">Edit</button>
+          <div class="prop-grid">
+            <div class="prop">
+              <div class="prop-label">Type name</div>
+              <div class="prop-value" id="view-name"></div>
+            </div>
+            <div class="prop">
+              <div class="prop-label">Data source</div>
+              <div class="prop-value" id="view-source"></div>
+            </div>
+            <div class="prop prop-wide">
+              <div class="prop-label">Description</div>
+              <div class="prop-value clamp" id="view-desc"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit mode: inputs + Cancel / Save in the foot -->
+        <div class="body edit" id="identity-edit" hidden>
+          <div class="field">
+            <label for="type-name">Type name</label>
+            <input id="type-name" type="text" />
+          </div>
+          <div class="field">
+            <label for="type-desc">Description <span class="opt">optional</span></label>
+            <textarea id="type-desc" rows="2"></textarea>
+          </div>
+          <div class="field">
+            <label for="type-source">Data source</label>
+            <select id="type-source">
+              <option value="gems">GEMS CSV export</option>
+              <option value="aim" disabled>AiM (SoloDL / MXG) — coming later</option>
+              <option value="motec" disabled>MoTeC i2 export — coming later</option>
+            </select>
+          </div>
+        </div>
+        <div class="foot" id="foot-edit" hidden>
+          <span class="status" id="identity-status">No unsaved changes</span>
+          <span class="filler"></span>
+          <button class="btn-ghost" id="btn-cancel">Cancel</button>
+          <button class="btn" id="btn-save" disabled>Save changes</button>
+        </div>
+      </div>
+
+      <div class="section-h">
+        <span>Channels</span>
+        <span class="count" id="channels-count"></span>
+      </div>
+      <div class="card">
+        <div class="table-head">
+          <span class="summary" id="channels-summary"></span>
+          <span class="filler"></span>
+          <button class="btn-thin" id="btn-add-channel">+ Add channel</button>
+        </div>
+        <table class="tt" aria-label="Channels for this car type">
+          <thead>
+            <tr>
+              <th>Canonical</th>
+              <th>CSV column</th>
+              <th>Unit</th>
+              <th>Rate</th>
+              <th>Source</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="channels-body"></tbody>
+        </table>
+      </div>
+
+      <div class="section-h">
+        <span>Checks</span>
+        <span class="count" id="checks-count"></span>
+      </div>
+      <div class="card">
+        <div class="table-head">
+          <span class="summary" id="checks-summary"></span>
+          <span class="filler"></span>
+          <button class="btn-thin" id="btn-add-check">+ Add check</button>
+        </div>
+        <table class="tt" aria-label="Checks for this car type">
+          <thead>
+            <tr>
+              <th>Check</th>
+              <th>Tier</th>
+              <th>Severity</th>
+              <th style="text-align:center;">Enabled</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="checks-body"></tbody>
+        </table>
+      </div>
+
+      <div class="section-h">
+        <span>Cars of this type</span>
+        <span class="count" id="cars-of-type-count"></span>
+      </div>
+      <div class="card">
+        <div class="cars-of-type" id="cars-of-type"></div>
+      </div>
+
+      <div class="section-h"><span>Danger zone</span></div>
+      <div class="danger-card">
+        <div class="danger-row">
+          <div>
+            <div class="title">Archive car type</div>
+            <div class="desc">
+              Hides this type from the picker when adding new cars. Existing cars of this type keep working. Reversible at any time.
+            </div>
+          </div>
+          <button class="btn-danger" id="btn-archive-type">Archive type</button>
+        </div>
+        <div class="danger-row">
+          <div>
+            <div class="title">Delete car type</div>
+            <div class="desc">
+              Permanently removes this type and its channel + check templates. <span class="em">This cannot be undone.</span>
+            </div>
+            <div class="blocked" id="delete-blocked"></div>
+          </div>
+          <button class="btn-danger" id="btn-delete-type">Delete type…</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    const params = new URLSearchParams(location.search);
+    const requestedId = params.get('id');
+    const types = data.carTypeTemplates || [];
+    const type = (requestedId && types.find(t => t.id === requestedId)) || types[0];
+
+    if (!type) {
+      $('hero-name').textContent = 'No car types defined';
+      $('hero-desc').textContent = 'Create a car type from the Car types list.';
+      throw new Error('No car-type templates available');
+    }
+
+    function carsForType() { return data.cars.filter(c => c.carType === type.name); }
+
+    const SOURCE_LABEL = {
+      gems: 'GEMS CSV export',
+      aim: 'AiM (SoloDL / MXG)',
+      motec: 'MoTeC i2 export',
+    };
+
+    let original = null;
+    function captureOriginal() {
+      original = { name: type.name, description: type.description, source: type.source };
+    }
+
+    function refreshDirty() {
+      const isDirty = original
+        ? ($('type-name').value.trim() !== original.name
+          || $('type-desc').value !== original.description
+          || $('type-source').value !== original.source)
+        : false;
+      $('btn-save').disabled = !isDirty || $('type-name').value.trim() === '';
+      $('identity-status').textContent = isDirty ? 'Unsaved changes' : 'No unsaved changes';
+      $('identity-status').style.color = isDirty ? 'var(--accent)' : 'var(--text-dim)';
+    }
+
+    function setEditing(on) {
+      $('identity-view').hidden = on;
+      $('identity-edit').hidden = !on;
+      $('foot-edit').hidden = !on;
+      if (on) setTimeout(() => $('type-name').focus(), 50);
+    }
+
+    function renderHero() {
+      document.title = `${type.name} · Crosslink Motorsports`;
+      $('crumb-name').textContent = type.name;
+      $('hero-name').textContent = type.name;
+      $('hero-desc').textContent = type.description;
+      $('hero-cars').textContent = String(carsForType().length).padStart(2, '0');
+      $('hero-channels').textContent = String(type.channels.length).padStart(2, '0');
+      const enabled = type.checks.filter(c => c.enabled).length;
+      $('hero-checks').textContent = `${String(enabled).padStart(2, '0')}/${String(type.checks.length).padStart(2, '0')}`;
+    }
+
+    function renderIdentityView() {
+      $('view-name').textContent = type.name;
+      $('view-source').textContent = SOURCE_LABEL[type.source] || type.source;
+      const desc = (type.description || '').trim();
+      const descEl = $('view-desc');
+      if (desc) {
+        descEl.textContent = desc;
+        descEl.title = desc;
+        descEl.classList.remove('empty');
+      } else {
+        descEl.textContent = 'No description';
+        descEl.removeAttribute('title');
+        descEl.classList.add('empty');
+      }
+    }
+
+    function renderIdentityInputs() {
+      $('type-name').value = type.name;
+      $('type-desc').value = type.description;
+      $('type-source').value = type.source;
+      captureOriginal();
+      refreshDirty();
+    }
+
+    function renderIdentity() {
+      renderIdentityView();
+      renderIdentityInputs();
+    }
+
+    function renderChannels() {
+      const globalCount = type.channels.filter(c => c.source === 'global').length;
+      const teamCount = type.channels.length - globalCount;
+      $('channels-count').textContent = `${type.channels.length} channels`;
+      $('channels-summary').textContent = `${globalCount} from global library, ${teamCount} team-local`;
+      $('channels-body').innerHTML = type.channels.map((ch, i) => `
+        <tr data-ch="${i}">
+          <td><span class="canonical">${ch.canonical}</span></td>
+          <td><span class="csv-col">${ch.csv}</span></td>
+          <td><span class="unit">${ch.unit}</span></td>
+          <td><span class="rate">${ch.rate}</span></td>
+          <td><span class="source-pill ${ch.source}">${ch.source}</span></td>
+          <td style="text-align:right;">
+            <div class="kebab-wrap">
+              <button class="kebab-btn" data-kebab="ch-${i}" aria-label="Channel actions" aria-haspopup="menu" aria-expanded="false">⋯</button>
+              <div class="kebab-menu" role="menu" data-kebab-menu="ch-${i}">
+                <button data-act="edit-ch" data-idx="${i}" role="menuitem">Edit mapping…</button>
+                <button data-act="rename-ch" data-idx="${i}" role="menuitem">Rename CSV column…</button>
+                <div class="sep" role="separator"></div>
+                <button data-act="remove-ch" data-idx="${i}" class="danger" role="menuitem">Remove from type</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderChecks() {
+      const enabled = type.checks.filter(c => c.enabled).length;
+      $('checks-count').textContent = `${type.checks.length} checks`;
+      $('checks-summary').textContent = `${enabled} enabled, ${type.checks.length - enabled} disabled`;
+      $('checks-body').innerHTML = type.checks.map((ck, i) => `
+        <tr data-ck="${i}">
+          <td>
+            <div class="check-name">${ck.name}</div>
+            <div class="check-expr">${ck.expression}</div>
+          </td>
+          <td><span class="tier-pill">${ck.tier}</span></td>
+          <td><span class="severity-pill ${ck.severity}">${ck.severity}</span></td>
+          <td style="text-align:center;">
+            <button class="toggle ${ck.enabled ? 'on' : ''}" data-toggle="${i}" aria-label="Toggle ${ck.name}" aria-pressed="${ck.enabled}"></button>
+          </td>
+          <td style="text-align:right;">
+            <div class="kebab-wrap">
+              <button class="kebab-btn" data-kebab="ck-${i}" aria-label="Check actions" aria-haspopup="menu" aria-expanded="false">⋯</button>
+              <div class="kebab-menu" role="menu" data-kebab-menu="ck-${i}">
+                <button data-act="edit-ck" data-idx="${i}" role="menuitem">Edit expression…</button>
+                <button data-act="duplicate-ck" data-idx="${i}" role="menuitem">Duplicate</button>
+                <div class="sep" role="separator"></div>
+                <button data-act="remove-ck" data-idx="${i}" class="danger" role="menuitem">Remove from type</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCarsOfType() {
+      const cars = carsForType();
+      $('cars-of-type-count').textContent = `${cars.length} car${cars.length === 1 ? '' : 's'}`;
+      const wrap = $('cars-of-type');
+      if (cars.length === 0) {
+        wrap.innerHTML = '<div class="cars-empty">No cars of this type yet. Add one from Fleet.</div>';
+      } else {
+        wrap.innerHTML = cars.map(c => `
+          <a class="car-chip" href="car-detail.html?id=${c.id}">
+            <span class="num">#${c.number}</span>
+            <span class="meta">
+              <div class="name">${c.name}</div>
+              <div class="driver">${c.driver}</div>
+            </span>
+          </a>
+        `).join('');
+      }
+
+      const blocked = $('delete-blocked');
+      const deleteBtn = $('btn-delete-type');
+      if (cars.length > 0) {
+        blocked.textContent = `Blocked — ${cars.length} car${cars.length === 1 ? '' : 's'} still inherit from this type. Reassign or remove them first.`;
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = 0.4;
+        deleteBtn.style.cursor = 'not-allowed';
+      } else {
+        blocked.textContent = '';
+        deleteBtn.disabled = false;
+        deleteBtn.style.opacity = '';
+        deleteBtn.style.cursor = '';
+      }
+    }
+
+    renderHero();
+    renderIdentity();
+    renderChannels();
+    renderChecks();
+    renderCarsOfType();
+
+    // Identity dirty tracking + edit-mode toggle
+    ['type-name', 'type-desc', 'type-source'].forEach(id => {
+      $(id).addEventListener('input', refreshDirty);
+      $(id).addEventListener('change', refreshDirty);
+    });
+    $('btn-edit-identity').addEventListener('click', () => setEditing(true));
+    $('btn-cancel').addEventListener('click', () => {
+      renderIdentityInputs();
+      setEditing(false);
+    });
+    $('btn-save').addEventListener('click', () => {
+      type.name = $('type-name').value.trim();
+      type.description = $('type-desc').value;
+      type.source = $('type-source').value;
+      RCH.toast(`Saved ${type.name}`);
+      renderHero();
+      renderIdentityView();
+      captureOriginal();
+      refreshDirty();
+      setEditing(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !$('identity-edit').hidden) {
+        renderIdentityInputs();
+        setEditing(false);
+      }
+    });
+
+    // Header / add buttons
+    $('btn-add-channel').addEventListener('click', () => RCH.toast('Add channel — would open library picker'));
+    $('btn-add-check').addEventListener('click', () => RCH.toast('Add check — would open check library picker'));
+
+    // Toggles
+    document.body.addEventListener('click', (e) => {
+      const tog = e.target.closest('.toggle[data-toggle]');
+      if (tog) {
+        const idx = parseInt(tog.dataset.toggle, 10);
+        type.checks[idx].enabled = !type.checks[idx].enabled;
+        renderChecks();
+        renderHero();
+        const enabled = type.checks.filter(c => c.enabled).length;
+        RCH.toast(`${type.checks[idx].name} — ${type.checks[idx].enabled ? 'enabled' : 'disabled'} (${enabled}/${type.checks.length})`);
+      }
+    });
+
+    // Kebab menus
+    function closeAllKebabs(except) {
+      document.querySelectorAll('.kebab-menu.open').forEach(m => {
+        if (m === except) return;
+        m.classList.remove('open');
+        const btn = m.parentElement.querySelector('.kebab-btn');
+        if (btn) {
+          btn.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+    document.body.addEventListener('click', (e) => {
+      const kebab = e.target.closest('.kebab-btn[data-kebab]');
+      if (kebab) {
+        e.stopPropagation();
+        const id = kebab.dataset.kebab;
+        const menu = document.querySelector(`.kebab-menu[data-kebab-menu="${id}"]`);
+        const willOpen = !menu.classList.contains('open');
+        closeAllKebabs(menu);
+        menu.classList.toggle('open', willOpen);
+        kebab.classList.toggle('open', willOpen);
+        kebab.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        return;
+      }
+      const item = e.target.closest('.kebab-menu button[data-act]');
+      if (item) {
+        e.stopPropagation();
+        closeAllKebabs(null);
+        const idx = parseInt(item.dataset.idx, 10);
+        const labels = {
+          'edit-ch': `Edit ${type.channels[idx].canonical} mapping — would open editor`,
+          'rename-ch': `Rename CSV column for ${type.channels[idx].canonical} — would open prompt`,
+          'remove-ch': `Remove ${type.channels[idx].canonical} from ${type.name} — would confirm`,
+          'edit-ck': `Edit "${type.checks[idx].name}" — would open expression editor`,
+          'duplicate-ck': `Duplicate "${type.checks[idx].name}"`,
+          'remove-ck': `Remove "${type.checks[idx].name}" from ${type.name} — would confirm`,
+        };
+        RCH.toast(labels[item.dataset.act] || 'Action');
+        return;
+      }
+      if (!e.target.closest('.kebab-wrap')) closeAllKebabs(null);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllKebabs(null);
+    });
+
+    // Danger zone
+    $('btn-archive-type').addEventListener('click', () => RCH.toast(`Archive ${type.name} — would confirm (reversible)`));
+    $('btn-delete-type').addEventListener('click', () => {
+      if ($('btn-delete-type').disabled) return;
+      RCH.toast(`Delete ${type.name} — would open confirm`);
+    });
+  </script>
+</body>
+</html>

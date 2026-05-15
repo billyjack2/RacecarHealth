@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create team · RaceCarHealth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Pre-app chrome — pages without the app sidebar use this layout */
+    body {
+      background-image:
+        radial-gradient(circle at 80% 0%, rgba(34,211,238,0.07), transparent 40%),
+        radial-gradient(circle at 0% 100%, rgba(34,211,238,0.04), transparent 30%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px);
+      min-height: 100vh;
+    }
+    .shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+
+    .topbar {
+      padding: 22px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .product-brand { display: flex; align-items: center; gap: 10px; color: var(--accent); }
+    .product-brand .mark {
+      width: 22px; height: 22px;
+      border: 2px solid currentColor;
+      position: relative;
+    }
+    .product-brand .mark::after {
+      content: '';
+      position: absolute;
+      top: -2px; bottom: -2px; left: 50%;
+      width: 2px; background: currentColor;
+      transform: translateX(-1px);
+    }
+    .product-brand .text {
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text);
+    }
+    .product-brand .text .em { color: var(--accent); }
+
+    .topbar .signed-as {
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .topbar .signed-as .who { color: var(--text); font-family: var(--mono); }
+    .topbar .signed-as .signout {
+      color: var(--text-muted); cursor: pointer;
+      border: 0; background: transparent;
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0;
+    }
+    .topbar .signed-as .signout:hover { color: var(--accent); }
+
+    .pre-main { display: grid; place-items: center; padding: 48px 24px; }
+    .pre-card {
+      width: 100%; max-width: 540px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 36px 36px 28px;
+      position: relative;
+    }
+    .pre-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent);
+    }
+
+    /* Wizard step indicator */
+    .steps {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 22px;
+      font-family: var(--mono);
+      font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .steps .step { display: inline-flex; align-items: center; gap: 6px; }
+    .steps .step .pin {
+      width: 18px; height: 18px;
+      border: 1px solid var(--border-strong);
+      display: inline-grid; place-items: center;
+      font-size: 10px; color: var(--text-muted);
+    }
+    .steps .step.active { color: var(--accent); }
+    .steps .step.active .pin {
+      border-color: var(--accent); color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .steps .sep { color: var(--text-dim); opacity: 0.6; }
+
+    .kicker {
+      font-size: 11px; letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    h1.head {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: -0.4px;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+    .lede {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 0 0 24px;
+      max-width: 44ch;
+    }
+
+    .invite-hint {
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 10px; letter-spacing: 1.5px;
+      color: var(--text-dim);
+      display: flex; gap: 8px; align-items: center;
+    }
+    .invite-hint .ct { color: var(--accent); }
+
+    .pre-actions {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 26px; padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .pre-actions .filler { flex: 1; }
+    .pre-actions .btn { padding: 11px 18px; }
+    .pre-actions .btn-ghost { padding: 11px 18px; }
+
+    .footnote {
+      padding: 18px 32px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-dim);
+      display: flex; gap: 18px; align-items: center;
+    }
+    .footnote .doc { color: var(--text-muted); cursor: pointer; }
+    .footnote .doc:hover { color: var(--accent); }
+    .footnote .filler { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="product-brand" href="create-team.html" aria-label="RaceCarHealth">
+        <span class="mark" aria-hidden="true"></span>
+        <span class="text">Race<span class="em">Car</span>Health</span>
+      </a>
+      <div class="signed-as">
+        <span>Signed in as <span class="who">billy.j.smith2@gmail.com</span></span>
+        <button class="signout" id="btn-signout">Sign out</button>
+      </div>
+    </header>
+
+    <main class="pre-main">
+      <section class="pre-card" aria-labelledby="card-h">
+        <div class="steps" aria-label="Onboarding progress">
+          <span class="step active"><span class="pin">1</span> Team</span>
+          <span class="sep">›</span>
+          <span class="step"><span class="pin">2</span> First car</span>
+          <span class="sep">›</span>
+          <span class="step"><span class="pin">3</span> First upload</span>
+        </div>
+
+        <p class="kicker">Welcome to RaceCarHealth</p>
+        <h1 class="head" id="card-h">Create your team</h1>
+        <p class="lede">A team is your workspace. Cars, sessions, checks, and reports all belong to one team. You can add teammates after this step.</p>
+
+        <form id="create-team-form" novalidate>
+          <div class="field">
+            <label for="team-name">Team name <span class="req">*</span></label>
+            <input id="team-name" name="name" type="text" placeholder="Crosslink Motorsports" autocomplete="organization" required />
+          </div>
+
+          <div class="field">
+            <label>Team logo <span class="opt">optional</span></label>
+            <div class="logo-row">
+              <div class="logo-preview" id="logo-preview" aria-hidden="true">No logo</div>
+              <div class="logo-hint">
+                Used in headers and exported reports.
+                <span class="mono">SVG, PNG, or JPG · ≤ 1MB</span>
+              </div>
+              <button type="button" class="btn-thin" id="btn-choose-logo">Choose file</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="invites">Invite teammates <span class="opt">optional</span></label>
+            <textarea id="invites" placeholder="alice@team.com, bob@team.com&#10;chen@team.com"></textarea>
+            <div class="invite-hint">
+              <span><span class="ct" id="invite-count">0</span> recipient(s)</span>
+              <span>· Comma or newline separated</span>
+            </div>
+          </div>
+
+          <div class="pre-actions">
+            <span class="filler"></span>
+            <button type="button" class="btn-ghost" id="btn-skip">Skip — I'll set up later</button>
+            <button type="submit" class="btn" id="btn-submit" disabled>Create team →</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footnote">
+      <span class="doc">Privacy</span>
+      <span class="doc">Terms</span>
+      <span class="doc">Docs</span>
+      <span class="filler"></span>
+      <span>RaceCarHealth · v0.1 prototype</span>
+    </footer>
+  </div>
+
+  <script src="partials.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const nameInput = $('team-name');
+    const inviteInput = $('invites');
+    const submitBtn = $('btn-submit');
+    const logoBtn = $('btn-choose-logo');
+    const logoPreview = $('logo-preview');
+
+    nameInput.addEventListener('input', () => {
+      submitBtn.disabled = nameInput.value.trim().length === 0;
+    });
+
+    inviteInput.addEventListener('input', () => {
+      const emails = inviteInput.value
+        .split(/[,\n]/)
+        .map(s => s.trim())
+        .filter(s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s));
+      $('invite-count').textContent = emails.length;
+    });
+
+    let logoLoaded = false;
+    function setLogoLoaded(on) {
+      logoLoaded = on;
+      if (on) {
+        logoPreview.classList.add('has-image');
+        logoPreview.innerHTML = '<img src="assets/logo-crosslink.png" alt="Team logo preview" />';
+        logoBtn.textContent = 'Remove';
+        logoBtn.classList.add('danger');
+      } else {
+        logoPreview.classList.remove('has-image');
+        logoPreview.innerHTML = 'No logo';
+        logoBtn.textContent = 'Choose file';
+        logoBtn.classList.remove('danger');
+      }
+    }
+    logoBtn.addEventListener('click', () => setLogoLoaded(!logoLoaded));
+
+    $('btn-signout').addEventListener('click', () => RCH.toast('Sign out — would return to landing'));
+
+    $('btn-skip').addEventListener('click', () => {
+      RCH.toast('Would create team with defaults → Fleet (empty)');
+      setTimeout(() => { window.location.href = 'cars-list-d-final.html'; }, 900);
+    });
+
+    $('create-team-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (submitBtn.disabled) return;
+      const name = nameInput.value.trim();
+      RCH.toast(`Would create "${name}" → continue to first car`);
+      setTimeout(() => { window.location.href = 'cars-list-d-final.html'; }, 1100);
+    });
+  </script>
+</body>
+</html>

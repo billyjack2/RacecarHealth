@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>#88 Bolt at Road Atlanta · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: combined car+event hero, strip, stints grid, check rollup */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
+        var(--surface);
+      padding: 18px 26px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .hero-num {
+      font-family: var(--mono);
+      font-size: 66px; font-weight: 700;
+      letter-spacing: -2.5px; line-height: 0.9;
+      color: var(--accent);
+    }
+    .hero-mid .car-name {
+      font-size: 24px; font-weight: 700;
+      margin: 0 0 3px;
+      letter-spacing: -0.4px; text-transform: uppercase;
+    }
+    .hero-mid .car-meta {
+      color: var(--text-muted); font-family: var(--mono);
+      font-size: 11px; letter-spacing: 0.5px;
+    }
+    .hero-mid .at {
+      margin-top: 10px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .hero-mid .event-track { font-size: 15px; font-weight: 600; margin-top: 3px; }
+    .hero-mid .event-meta {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .strip {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 22px;
+    }
+    .strip > div { padding: 14px 18px; border-right: 1px solid var(--border); }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+    .strip .val.pass { color: var(--pass); }
+    .strip .val.warn { color: var(--warn); }
+    .strip .val.fail { color: var(--fail); }
+
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 20px; }
+
+    /* Stints */
+    .stints { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stint {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px 18px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.08s, transform 0.1s;
+    }
+    .stint:hover { background: var(--surface-2); transform: translateY(-1px); }
+    .stint::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .stint.pass::before { background: var(--pass); }
+    .stint.warn::before { background: var(--warn); }
+    .stint.fail::before { background: var(--fail); }
+    .stint-num {
+      font-family: var(--mono);
+      font-size: 10px; letter-spacing: 2px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .stint-time {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .stint-name {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--mono);
+    }
+    .stint-meta {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+    .stint-verdict {
+      position: absolute; top: 14px; right: 16px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      font-weight: 700;
+    }
+    .stint-verdict.pass { color: var(--pass); }
+    .stint-verdict.warn { color: var(--warn); }
+    .stint-verdict.fail { color: var(--fail); }
+
+    /* Check rollup */
+    .group { border: 1px solid var(--border); background: var(--surface); margin-bottom: 14px; }
+    .group-head {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .group-name { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+    .group-count {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim); letter-spacing: 1px;
+    }
+    .check {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .check:last-child { border-bottom: 0; }
+    .check-name {
+      font-size: 14px; font-weight: 600; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .check-threshold {
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); letter-spacing: 0.3px;
+    }
+    .rollup {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      font-weight: 700;
+      padding: 4px 10px;
+      border: 1px solid currentColor;
+    }
+    .rollup.pass { color: var(--pass); }
+    .rollup.warn { color: var(--warn); }
+    .rollup.fail { color: var(--fail); }
+    .check-results { display: flex; gap: 6px; align-items: center; }
+    .file-result {
+      flex: 1;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .file-result.pass { border-color: rgba(34,197,94,0.4); }
+    .file-result.warn { border-color: rgba(245,158,11,0.5); }
+    .file-result.fail { border-color: rgba(239,68,68,0.5); }
+    .file-result .fr-id {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+      color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .file-result .fr-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+    .file-result.pass .fr-val { color: var(--pass); }
+    .file-result.warn .fr-val { color: var(--warn); }
+    .file-result.fail .fr-val { color: var(--fail); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="events"></aside>
+
+    <main class="main">
+      <div class="crumbs">
+        <a href="events-list.html">Events</a>
+        <span class="sep">/</span>
+        <a href="event-detail.html" id="crumb-event"></a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-car"></span>
+      </div>
+
+      <section class="hero">
+        <div class="hero-num" id="hero-num"></div>
+        <div class="hero-mid">
+          <h1 class="car-name" id="hero-car-name"></h1>
+          <div class="car-meta" id="hero-car-meta"></div>
+          <div class="at">at event</div>
+          <div class="event-track" id="hero-event-track"></div>
+          <div class="event-meta" id="hero-event-meta"></div>
+        </div>
+      </section>
+
+      <div class="strip">
+        <div>
+          <div class="lbl">Stints</div>
+          <div class="val" id="s-stints"></div>
+        </div>
+        <div>
+          <div class="lbl">Checks run</div>
+          <div class="val" id="s-checks"></div>
+        </div>
+        <div>
+          <div class="lbl">Passing</div>
+          <div class="val pass" id="s-passes"></div>
+        </div>
+        <div>
+          <div class="lbl">Warnings</div>
+          <div class="val warn" id="s-warns"></div>
+        </div>
+        <div>
+          <div class="lbl">Failures</div>
+          <div class="val fail" id="s-fails"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" id="btn-rebucket">Re-bucket stints</button>
+        <button class="btn-ghost" id="btn-export">Export PDF</button>
+        <button class="btn" id="btn-share">Share report</button>
+      </div>
+
+      <div class="section-h">
+        <span>Stints at event</span>
+        <span class="count" id="stints-count"></span>
+      </div>
+      <div class="stints" id="stints"></div>
+
+      <div class="section-h">
+        <span>Check rollup (worst-of across stints)</span>
+        <span class="count" id="checks-count"></span>
+      </div>
+      <div id="groups"></div>
+    </main>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    data.events = data.events || [];
+
+    const params = new URLSearchParams(location.search);
+    const requestedCarId = params.get('car');
+    const requestedEventId = params.get('event');
+
+    const car = (requestedCarId && data.cars.find(c => c.id === requestedCarId))
+      || data.cars.find(c => c.id === 'car_88')
+      || data.cars[0];
+    const event = (requestedEventId && data.events.find(e => e.id === requestedEventId))
+      || data.events.find(e => e.id === 'evt_road_atl_may')
+      || data.events[0]
+      || {
+        id: 'evt_fallback', name: car.lastSessionTrack, track: car.lastSessionTrack,
+        startDate: car.lastSessionAt, endDate: car.lastSessionAt, kind: 'Test day',
+        cars: [car.id], sessionsCount: 1, verdict: car.lastVerdict,
+      };
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+    };
+    const fmtShortRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts)
+        : `${s.toLocaleDateString('en-US', opts)} – ${e.toLocaleDateString('en-US', { day: 'numeric' })}`;
+    };
+
+    $('crumb-event').textContent = `${event.track}, ${fmtShortRange(event.startDate, event.endDate)}`;
+    $('crumb-event').href = `event-detail.html?id=${event.id}`;
+    $('crumb-car').textContent = `#${car.number} ${car.name}`;
+
+    $('hero-num').textContent = `#${car.number}`;
+    $('hero-car-name').textContent = car.name;
+    $('hero-car-meta').textContent = `${car.carType} · ${car.driver}`;
+    $('hero-event-track').textContent = event.track;
+    $('hero-event-meta').textContent = `${event.kind} · ${fmtRange(event.startDate, event.endDate)}`;
+
+    const fullSession = (data.session && data.session.car && car.number === data.session.car.number) ? data.session : null;
+
+    function buildStints() {
+      if (fullSession) {
+        return fullSession.files.map((f, i) => ({
+          id: f.id, name: f.name, time: f.start, duration: f.duration,
+          samples: f.samples, verdict: f.verdict, stintNumber: i + 1,
+        }));
+      }
+      const verdicts = (() => {
+        if (event.verdict === 'fail') return ['pass', 'warn', 'fail'].slice(0, event.sessionsCount);
+        if (event.verdict === 'warn') return ['pass', 'warn', 'pass', 'warn'].slice(0, event.sessionsCount);
+        return Array(event.sessionsCount).fill('pass');
+      })();
+      const startHours = [9, 11, 13, 15, 17];
+      return Array.from({ length: event.sessionsCount }).map((_, i) => ({
+        id: `synthetic_${event.id}_${car.id}_${i}`,
+        name: `stint-${i + 1}.csv`,
+        time: `${String(startHours[i] || 9 + i).padStart(2, '0')}:14`,
+        duration: ['47m', '52m', '1h 08m', '45m', '38m'][i] || '40m',
+        samples: ['1.8M', '2.0M', '2.6M', '1.7M', '1.4M'][i] || '1.5M',
+        verdict: verdicts[i] || 'pass',
+        stintNumber: i + 1,
+      }));
+    }
+    const stints = buildStints();
+
+    function buildSummary() {
+      if (fullSession) return fullSession.summary;
+      const checksRun = 8;
+      const verdictCounts = stints.reduce((acc, s) => (acc[s.verdict] = (acc[s.verdict] || 0) + 1, acc), {});
+      const fails = verdictCounts.fail ? 1 : 0;
+      const warns = (verdictCounts.warn || 0) + (event.verdict === 'warn' && !fails ? 1 : 0);
+      return { checksRun, passes: checksRun - fails - warns, warns: Math.min(warns, 3), fails };
+    }
+    const summary = buildSummary();
+
+    $('s-stints').textContent = String(stints.length).padStart(2, '0');
+    $('s-checks').textContent = String(summary.checksRun).padStart(2, '0');
+    $('s-passes').textContent = String(summary.passes).padStart(2, '0');
+    $('s-warns').textContent = String(summary.warns).padStart(2, '0');
+    $('s-fails').textContent = String(summary.fails).padStart(2, '0');
+
+    $('stints-count').textContent = `${stints.length} stints`;
+
+    $('stints').innerHTML = stints.map(s => `
+      <div class="stint ${s.verdict}" data-stint="${s.id}" tabindex="0" role="button" aria-label="Stint ${s.stintNumber} — ${s.verdict}">
+        <div class="stint-num">Stint ${s.stintNumber}</div>
+        <div class="stint-time">${s.time}</div>
+        <div class="stint-name">${s.name}</div>
+        <div class="stint-meta">${s.duration} · ${s.samples} samples</div>
+        <div class="stint-verdict ${s.verdict}">${s.verdict}</div>
+      </div>
+    `).join('');
+
+    function buildGroups() {
+      if (fullSession) return fullSession.checkGroups;
+      return [
+        {
+          name: 'Engine',
+          checks: [
+            { name: 'RPM peak under redline', rollup: 'pass', threshold: 'max(RPM) < 8500',
+              perFile: Object.fromEntries(stints.map((s, i) => [s.id, { verdict: 'pass', observed: '8120 rpm' }])) },
+          ],
+        },
+        {
+          name: 'Fluids',
+          checks: [
+            { name: 'Coolant under load', rollup: event.verdict, threshold: 'max(CoolantTemp) < 95°C when RPM > 4000',
+              perFile: Object.fromEntries(stints.map((s, i) => [s.id, { verdict: s.verdict, observed: ['88°C', '94°C', '102°C', '90°C'][i] || '92°C' }])) },
+          ],
+        },
+      ];
+    }
+    const groups = buildGroups();
+    $('checks-count').textContent = `${groups.reduce((a, g) => a + g.checks.length, 0)} checks · ${groups.length} groups`;
+
+    $('groups').innerHTML = groups.map(g => `
+      <section class="group">
+        <header class="group-head">
+          <div class="group-name">${g.name}</div>
+          <div class="group-count">${g.checks.length} checks</div>
+        </header>
+        ${g.checks.map(c => `
+          <div class="check">
+            <div>
+              <div class="check-name">
+                ${c.name}
+                <span class="rollup ${c.rollup}">${c.rollup}</span>
+              </div>
+              <div class="check-threshold">${c.threshold}</div>
+            </div>
+            <div class="check-results">
+              ${stints.map(s => {
+                const pf = c.perFile[s.id] || { verdict: 'pass', observed: '—' };
+                return `<div class="file-result ${pf.verdict}">
+                  <div class="fr-id">Stint ${s.stintNumber}</div>
+                  <div class="fr-val">${pf.observed}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </section>
+    `).join('');
+
+    $('stints').addEventListener('click', (e) => {
+      const stint = e.target.closest('.stint[data-stint]');
+      if (stint) {
+        const s = stints.find(x => x.id === stint.dataset.stint);
+        RCH.toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+      }
+    });
+    $('stints').addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const stint = e.target.closest('.stint[data-stint]');
+      if (stint) {
+        e.preventDefault();
+        const s = stints.find(x => x.id === stint.dataset.stint);
+        RCH.toast(`Would open stint ${s.stintNumber} detail (${s.name})`);
+      }
+    });
+
+    $('btn-rebucket').addEventListener('click', () => RCH.toast('Re-bucket stints — would open dialog'));
+    $('btn-export').addEventListener('click', () => RCH.toast('Export PDF — would generate report'));
+    $('btn-share').addEventListener('click', () => RCH.toast('Share — would copy link'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Road Atlanta — SCCA Majors · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: hero, notable, strip, expandable car-rows + session-rows */
+    .hero {
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top right, var(--accent-dim), transparent 60%),
+        var(--surface);
+      padding: 24px 28px;
+      margin-bottom: 0;
+    }
+    .hero-top {
+      display: grid;
+      grid-template-columns: 1fr minmax(280px, 360px);
+      gap: 28px;
+      align-items: start;
+    }
+    .hero-kind-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .hero-kind {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .hero-track {
+      font-size: 38px; font-weight: 700;
+      letter-spacing: -0.8px;
+      text-transform: uppercase;
+      margin: 0 0 4px;
+    }
+    .hero-name { font-size: 14px; color: var(--text-muted); }
+    .hero-dates {
+      font-family: var(--mono); font-size: 14px;
+      margin-top: 12px; letter-spacing: 0.5px;
+      color: var(--text);
+    }
+    .hero-dates .age {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-left: 10px;
+    }
+    .hero-notable {
+      border: 1px solid var(--border-strong);
+      background: rgba(0,0,0,0.3);
+      padding: 16px 18px;
+      position: relative;
+    }
+    .hero-notable::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+      background: currentColor;
+    }
+    .hero-notable.pass { color: var(--pass); }
+    .hero-notable.warn { color: var(--warn); }
+    .hero-notable.fail { color: var(--fail); }
+    .hero-notable .lbl {
+      font-family: var(--mono); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .hero-notable .body { font-size: 14px; line-height: 1.5; color: var(--text); }
+
+    .strip {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-top: 0;
+      background: var(--surface);
+      margin-bottom: 22px;
+    }
+    .strip > div { padding: 14px 20px; border-right: 1px solid var(--border); }
+    .strip > div:last-child { border-right: 0; }
+    .strip .lbl {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .strip .val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+    .strip .val.fail { color: var(--fail); }
+    .strip .val.warn { color: var(--warn); }
+
+    .actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
+
+    /* Cars at event — expandable rows */
+    .car-rows { border: 1px solid var(--border); background: var(--surface); }
+    .car-row { border-bottom: 1px solid var(--border); }
+    .car-row:last-child { border-bottom: 0; }
+    .car-row-head {
+      display: grid;
+      grid-template-columns: 70px 1.2fr 1fr 1.1fr 100px 110px 40px;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background 0.08s;
+    }
+    .car-row-head:hover { background: var(--surface-2); }
+    .car-row-head:focus-visible { outline-offset: -2px; }
+    .car-row.open .car-row-head { background: var(--surface-2); }
+
+    .cr-num {
+      font-family: var(--mono);
+      font-size: 28px; font-weight: 700;
+      color: var(--accent); letter-spacing: -1px;
+    }
+    .cr-name { font-size: 15px; font-weight: 600; }
+    .cr-driver { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .cr-type { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .cr-stints { font-family: var(--mono); font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; }
+    .cr-stints .ct { font-size: 16px; color: var(--text); font-weight: 500; margin-right: 4px; }
+
+    .session-dots { display: flex; gap: 4px; align-items: center; }
+    .session-dots .dot { width: 14px; height: 14px; border-radius: 1px; }
+    .session-dots .dot.pass { background: var(--pass); }
+    .session-dots .dot.warn { background: var(--warn); }
+    .session-dots .dot.fail { background: var(--fail); }
+
+    .chevron {
+      font-family: var(--mono);
+      color: var(--text-dim);
+      text-align: right;
+      transition: transform 0.12s, color 0.12s;
+    }
+    .car-row.open .chevron { transform: rotate(90deg); color: var(--accent); }
+
+    .sessions {
+      display: none;
+      padding: 0 20px 18px 90px;
+      border-top: 1px dashed var(--border);
+      background: rgba(10,11,13,0.4);
+    }
+    .car-row.open .sessions { display: block; }
+
+    .session-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 90px 100px 110px 38px 24px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.08s;
+      position: relative;
+    }
+    .session-row:last-child { border-bottom: 0; }
+    .session-row:hover { background: var(--surface-2); }
+    .session-row:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+    .session-row:hover .kebab-btn { color: var(--text-muted); }
+
+    .sess-time { font-family: var(--mono); font-size: 13px; color: var(--text); letter-spacing: 0.5px; }
+    .sess-time .date {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .sess-name { font-size: 13px; font-weight: 500; }
+    .sess-name .file {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); margin-top: 2px;
+    }
+    .sess-duration { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .sess-samples { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; }
+
+    .sess-summary {
+      padding: 10px 4px 14px;
+      font-size: 12px; color: var(--text-muted);
+      display: flex; gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+    }
+    .sess-summary .sep { color: var(--text-dim); }
+    .sess-summary a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="events"></aside>
+
+    <main class="main">
+      <div class="crumbs">
+        <a href="events-list.html">Events</a>
+        <span class="sep">/</span>
+        <span class="here" id="crumb-event"></span>
+      </div>
+
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-kind-row">
+              <div class="hero-kind" id="hero-kind"></div>
+              <span class="verdict" id="hero-verdict-pill"></span>
+            </div>
+            <h1 class="hero-track" id="hero-track"></h1>
+            <div class="hero-name" id="hero-name"></div>
+            <div class="hero-dates">
+              <span id="hero-dates"></span>
+              <span class="age" id="hero-age"></span>
+            </div>
+          </div>
+          <div class="hero-notable" id="hero-notable">
+            <div class="lbl">Notable</div>
+            <div class="body" id="hero-notable-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="strip">
+        <div>
+          <div class="lbl">Cars attended</div>
+          <div class="val" id="strip-cars"></div>
+        </div>
+        <div>
+          <div class="lbl">Stints run</div>
+          <div class="val" id="strip-stints"></div>
+        </div>
+        <div>
+          <div class="lbl">Checks evaluated</div>
+          <div class="val" id="strip-checks"></div>
+        </div>
+        <div>
+          <div class="lbl">Open concerns</div>
+          <div class="val fail" id="strip-fails"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" id="btn-export">Export event report</button>
+        <button class="btn" id="btn-share">Share</button>
+      </div>
+
+      <div class="section-h">
+        <span>Cars at event</span>
+        <span class="count" id="cars-count"></span>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter event view">
+        <button class="chip" id="chip-latest" aria-pressed="false">Latest stint only</button>
+        <button class="chip" id="chip-failed" aria-pressed="false">Failed only</button>
+        <div class="filler"></div>
+        <div class="results" id="filter-results"></div>
+      </div>
+
+      <div class="car-rows" id="car-rows"></div>
+    </main>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    // Defensive fallback
+    if (!data.events || data.events.length === 0) {
+      data.events = [{
+        id: 'evt_road_atl_may', name: 'Road Atlanta — SCCA Majors',
+        track: 'Road Atlanta', startDate: '2026-05-12', endDate: '2026-05-14',
+        kind: 'Race weekend', cars: ['car_88'], sessionsCount: 3, verdict: 'fail',
+        notable: '#88 Bolt — coolant ceiling exceeded',
+      }];
+    }
+
+    const params = new URLSearchParams(location.search);
+    const requestedId = params.get('id');
+    const event = (requestedId && data.events.find(e => e.id === requestedId))
+      || data.events.find(e => e.verdict === 'fail')
+      || data.events[0];
+
+    const carById = Object.fromEntries(data.cars.map(c => [c.id, c]));
+
+    const fmtRange = (start, end) => {
+      const s = new Date(start), e = new Date(end);
+      const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+      return start === end
+        ? s.toLocaleDateString('en-US', opts).toUpperCase()
+        : `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} – ${e.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+    };
+    const today = new Date('2026-05-14');
+    const fmtAge = (s) => {
+      const days = Math.round((today - new Date(s)) / 86400000);
+      if (days === 0) return 'TODAY';
+      if (days === 1) return 'YESTERDAY';
+      if (days < 7) return `${days}D AGO`;
+      if (days < 30) return `${Math.round(days / 7)}W AGO`;
+      return `${Math.round(days / 30)}MO AGO`;
+    };
+
+    $('crumb-event').textContent = `${event.track}, ${fmtRange(event.startDate, event.endDate)}`;
+    $('hero-kind').textContent = event.kind;
+    $('hero-track').textContent = event.track;
+    $('hero-name').textContent = event.name.replace(event.track + ' — ', '');
+    $('hero-dates').textContent = fmtRange(event.startDate, event.endDate);
+    $('hero-age').textContent = fmtAge(event.startDate);
+
+    const verdictPill = $('hero-verdict-pill');
+    verdictPill.classList.add(event.verdict);
+    verdictPill.textContent = event.verdict;
+
+    const notable = $('hero-notable');
+    notable.classList.add(event.verdict);
+    $('hero-notable-body').textContent = event.notable || 'No notable callouts for this event.';
+
+    // Strip
+    const matchingSession = (data.session && data.session.car && data.session.track === event.track && data.session.date === event.startDate)
+      ? data.session : null;
+    $('strip-cars').textContent = String(event.cars.length).padStart(2, '0');
+    $('strip-stints').textContent = String(event.sessionsCount).padStart(2, '0');
+    $('strip-checks').textContent = matchingSession ? matchingSession.summary.checksRun : Math.round(event.sessionsCount * 2.5);
+    $('strip-fails').textContent = matchingSession ? matchingSession.summary.fails : (event.verdict === 'fail' ? '01' : '00');
+
+    $('cars-count').textContent = `${event.cars.length} ${event.cars.length === 1 ? 'car' : 'cars'} on track`;
+
+    function sessionsForCarAtEvent(carId, ev) {
+      if (ev.id === 'evt_road_atl_may' && carId === 'car_88' && data.session) {
+        return data.session.files.map((f, i) => ({
+          id: f.id, name: f.name, time: f.start, date: ev.startDate,
+          duration: f.duration, samples: f.samples, verdict: f.verdict,
+          stintNumber: i + 1,
+        }));
+      }
+      const verdicts = (() => {
+        if (ev.verdict === 'fail') return ['pass', 'warn', 'fail'].slice(0, ev.sessionsCount);
+        if (ev.verdict === 'warn') return ['pass', 'warn', 'pass', 'warn'].slice(0, ev.sessionsCount);
+        return Array(ev.sessionsCount).fill('pass');
+      })();
+      const startHours = [9, 11, 13, 15, 17];
+      return Array.from({ length: ev.sessionsCount }).map((_, i) => ({
+        id: `synthetic_${ev.id}_${carId}_${i}`,
+        name: `Stint ${i + 1}`,
+        time: `${String(startHours[i] || 9 + i).padStart(2, '0')}:14`,
+        date: ev.startDate,
+        duration: ['47m', '52m', '1h 08m', '45m', '38m'][i] || '40m',
+        samples: ['1.8M', '2.0M', '2.6M', '1.7M', '1.4M'][i] || '1.5M',
+        verdict: verdicts[i] || 'pass',
+        stintNumber: i + 1,
+      }));
+    }
+
+    function rollupVerdict(sessions) {
+      if (sessions.some(s => s.verdict === 'fail')) return 'fail';
+      if (sessions.some(s => s.verdict === 'warn')) return 'warn';
+      return 'pass';
+    }
+
+    const carsBody = $('car-rows');
+    const view = { latestOnly: false, failedOnly: false };
+    const sessionsByCar = Object.fromEntries(
+      event.cars.map(cid => [cid, sessionsForCarAtEvent(cid, event)])
+    );
+
+    function visibleSessions(carId) {
+      let s = sessionsByCar[carId] || [];
+      if (view.latestOnly) {
+        const last = s.reduce((acc, x) => (x.stintNumber > (acc?.stintNumber ?? -1) ? x : acc), null);
+        s = last ? [last] : [];
+      }
+      if (view.failedOnly) s = s.filter(x => x.verdict !== 'pass');
+      return s;
+    }
+
+    function renderCars() {
+      const openCars = new Set(
+        Array.from(carsBody.querySelectorAll('.car-row.open')).map(r => r.dataset.car)
+      );
+
+      const carsToShow = event.cars.filter(carId => {
+        const car = carById[carId];
+        if (!car) return false;
+        if (view.failedOnly) {
+          const rollup = rollupVerdict(sessionsByCar[carId]);
+          if (rollup === 'pass') return false;
+        }
+        return true;
+      });
+
+      carsBody.innerHTML = carsToShow.map(carId => {
+        const car = carById[carId];
+        const fullSessions = sessionsByCar[carId];
+        const shownSessions = visibleSessions(carId);
+        const rollup = rollupVerdict(fullSessions);
+        const filtered = shownSessions.length !== fullSessions.length;
+        return `
+          <div class="car-row${openCars.has(carId) ? ' open' : ''}" data-car="${carId}">
+            <div class="car-row-head" tabindex="0" role="button" aria-expanded="${openCars.has(carId)}">
+              <div class="cr-num">${car.number}</div>
+              <div>
+                <div class="cr-name">${car.name}</div>
+                <div class="cr-driver">${car.driver}</div>
+              </div>
+              <div class="cr-type">${car.carType}</div>
+              <div class="cr-stints"><span class="ct">${shownSessions.length}${filtered ? `/${fullSessions.length}` : ''}</span>stints</div>
+              <div class="session-dots" aria-label="Per-stint verdict">
+                ${fullSessions.map(s => `<span class="dot ${s.verdict}" title="${s.name} — ${s.verdict}"></span>`).join('')}
+              </div>
+              <div><span class="verdict ${rollup}">${rollup}</span></div>
+              <div class="chevron">▸</div>
+            </div>
+            <div class="sessions">
+              ${shownSessions.map(s => `
+                <div class="session-row" data-session="${s.id}" tabindex="0" role="button">
+                  <div class="sess-time">
+                    ${s.time}
+                    <div class="date">stint ${s.stintNumber}</div>
+                  </div>
+                  <div class="sess-name">
+                    ${s.name}
+                    <div class="file">${s.id.startsWith('synthetic') ? '' : s.name}</div>
+                  </div>
+                  <div class="sess-duration">${s.duration}</div>
+                  <div class="sess-samples">${s.samples} samples</div>
+                  <div><span class="verdict ${s.verdict}">${s.verdict}</span></div>
+                  <div style="text-align:right;"><span class="arrow-end">→</span></div>
+                  <div class="kebab-wrap">
+                    <button class="kebab-btn" aria-label="Stint actions" aria-haspopup="menu" aria-expanded="false" data-kebab="${s.id}">⋯</button>
+                    <div class="kebab-menu" role="menu" data-kebab-menu="${s.id}">
+                      <button data-act="move" data-session-id="${s.id}" role="menuitem">Move to another event…</button>
+                      <button data-act="edit" data-session-id="${s.id}" role="menuitem">Edit stint</button>
+                      <div class="sep" role="separator"></div>
+                      <button data-act="rerun" data-session-id="${s.id}" role="menuitem">Re-run checks</button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+              <div class="sess-summary">
+                <span>Per-(car, event) report rolls up these ${shownSessions.length}${filtered ? ` of ${fullSessions.length}` : ''} stints</span>
+                <span class="sep">·</span>
+                <a href="#" data-open-car-event="${carId}">Open ${car.name} #${car.number} at ${event.track} →</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const totalStints = event.cars.reduce((n, cid) => n + (sessionsByCar[cid]?.length || 0), 0);
+      const shownStints = carsToShow.reduce((n, cid) => n + visibleSessions(cid).length, 0);
+      $('filter-results').textContent = (view.latestOnly || view.failedOnly)
+        ? `${carsToShow.length}/${event.cars.length} cars · ${shownStints}/${totalStints} stints`
+        : `${event.cars.length} cars · ${totalStints} stints`;
+    }
+
+    renderCars();
+
+    function carEventHref(carId) { return `car-event-detail.html?car=${carId}&event=${event.id}`; }
+
+    function closeAllKebabs(except) {
+      carsBody.querySelectorAll('.kebab-menu.open').forEach(m => {
+        if (m === except) return;
+        m.classList.remove('open');
+        const btn = m.parentElement.querySelector('.kebab-btn');
+        if (btn) {
+          btn.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    carsBody.addEventListener('click', (e) => {
+      const kebab = e.target.closest('.kebab-btn[data-kebab]');
+      if (kebab) {
+        e.stopPropagation();
+        const id = kebab.dataset.kebab;
+        const menu = carsBody.querySelector(`.kebab-menu[data-kebab-menu="${id}"]`);
+        const willOpen = !menu.classList.contains('open');
+        closeAllKebabs(menu);
+        menu.classList.toggle('open', willOpen);
+        kebab.classList.toggle('open', willOpen);
+        kebab.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        return;
+      }
+      const menuItem = e.target.closest('.kebab-menu button[data-act]');
+      if (menuItem) {
+        e.stopPropagation();
+        closeAllKebabs(null);
+        const act = menuItem.dataset.act;
+        const sid = menuItem.dataset.sessionId;
+        const labels = {
+          move: `Move stint ${sid} to another event — would open picker`,
+          edit: `Edit stint ${sid} — would open editor`,
+          rerun: `Re-run checks for stint ${sid} — would queue job`,
+        };
+        RCH.toast(labels[act] || 'Stint action');
+        return;
+      }
+      const sess = e.target.closest('.session-row[data-session]');
+      if (sess) {
+        e.stopPropagation();
+        const row = sess.closest('.car-row');
+        const carId = row && row.dataset.car;
+        if (carId) location.href = carEventHref(carId);
+        return;
+      }
+      const openLink = e.target.closest('a[data-open-car-event]');
+      if (openLink) {
+        e.preventDefault();
+        location.href = carEventHref(openLink.dataset.openCarEvent);
+        return;
+      }
+      const head = e.target.closest('.car-row-head');
+      if (head) {
+        const row = head.closest('.car-row');
+        row.classList.toggle('open');
+        head.setAttribute('aria-expanded', row.classList.contains('open'));
+      }
+    });
+    carsBody.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const head = e.target.closest('.car-row-head');
+      if (head) {
+        e.preventDefault();
+        const row = head.closest('.car-row');
+        row.classList.toggle('open');
+        head.setAttribute('aria-expanded', row.classList.contains('open'));
+        return;
+      }
+      const sess = e.target.closest('.session-row[data-session]');
+      if (sess) {
+        e.preventDefault();
+        const row = sess.closest('.car-row');
+        const carId = row && row.dataset.car;
+        if (carId) location.href = carEventHref(carId);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.kebab-wrap')) closeAllKebabs(null);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllKebabs(null);
+    });
+
+    const firstRow = carsBody.querySelector('.car-row');
+    if (firstRow) {
+      firstRow.classList.add('open');
+      firstRow.querySelector('.car-row-head').setAttribute('aria-expanded', 'true');
+    }
+
+    function setChip(btn, on) {
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    $('chip-latest').addEventListener('click', () => {
+      view.latestOnly = !view.latestOnly;
+      setChip($('chip-latest'), view.latestOnly);
+      renderCars();
+    });
+    $('chip-failed').addEventListener('click', () => {
+      view.failedOnly = !view.failedOnly;
+      setChip($('chip-failed'), view.failedOnly);
+      renderCars();
+    });
+
+    $('btn-export').addEventListener('click', () => RCH.toast('Export event report — would generate PDF'));
+    $('btn-share').addEventListener('click', () => RCH.toast('Share — would copy link'));
+  </script>
+</body>
+</html>
