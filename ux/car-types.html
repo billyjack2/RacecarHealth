@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car types · Crosslink Motorsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Page-specific: types table columns */
+    table.types { width: 100%; border-collapse: collapse; }
+    table.types thead th {
+      text-align: left;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      user-select: none;
+    }
+    table.types tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.types tbody tr { transition: background 0.08s; cursor: pointer; }
+    table.types tbody tr:hover { background: var(--surface-2); }
+    table.types tbody tr:hover .arrow-end { color: var(--accent); transform: translateX(2px); }
+    table.types tbody tr:last-child td { border-bottom: 0; }
+
+    .type-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+    .type-desc {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 3px; max-width: 56ch;
+      line-height: 1.5;
+    }
+    .ct-mono {
+      font-family: var(--mono); font-size: 14px;
+      font-weight: 500; color: var(--text);
+    }
+    .ct-mono .sub {
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-top: 2px;
+      font-weight: 400;
+    }
+    .car-pills {
+      display: flex; gap: 4px; align-items: center;
+      flex-wrap: wrap;
+    }
+    .car-pills .pill {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 3px 8px;
+      letter-spacing: 0.5px;
+    }
+    .car-pills .none {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px; text-transform: uppercase;
+      font-style: italic;
+    }
+    .source-pill {
+      display: inline-flex; align-items: center;
+      font-family: var(--mono); font-size: 9px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" data-active="cartypes"></aside>
+
+    <main class="main main--narrow">
+      <div class="page-head">
+        <div>
+          <p class="page-title">Crosslink Motorsports · Configure</p>
+          <h1 class="page-h1">Car types</h1>
+        </div>
+        <button class="btn" id="btn-new-type">+ New car type</button>
+      </div>
+
+      <p style="color:var(--text-muted); font-size:13px; max-width:62ch; margin:-8px 0 24px;">
+        Templates that define each car's channel mappings, check assignments, and dashboard layout. Edits to a type propagate to every car of that type.
+      </p>
+
+      <div class="toolbar" role="toolbar" aria-label="Filter car types">
+        <div class="search-wrap">
+          <span class="search-ico">⌕</span>
+          <input class="search" id="search" placeholder="Search type name…" aria-label="Search car types" />
+        </div>
+        <div class="filler"></div>
+        <div class="results" id="results-count"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="types" aria-label="Car types in this team">
+          <thead>
+            <tr>
+              <th class="sortable sorted" data-sort="name">Type <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="cars">Cars <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="channels">Channels <span class="arrow">↓</span></th>
+              <th class="sortable" data-sort="checks">Checks <span class="arrow">↓</span></th>
+              <th>Data source</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="types-body"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none;">
+          <div class="head">No matches</div>
+          <div class="sub">Try a different search.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="fixtures/data.js"></script>
+  <script src="partials.js"></script>
+  <script>
+    const data = window.CROSSLINK;
+    const $ = (id) => document.getElementById(id);
+
+    const types = data.carTypeTemplates || [];
+
+    function carsForType(type) {
+      return data.cars.filter(c => c.carType === type.name);
+    }
+
+    const SOURCE_LABEL = { gems: 'GEMS CSV', aim: 'AiM', motec: 'MoTeC' };
+
+    const state = { query: '', sortKey: 'name', sortDir: 'asc' };
+
+    function applyFilter(rows) {
+      const q = state.query.trim().toLowerCase();
+      if (!q) return rows;
+      return rows.filter(t => t.name.toLowerCase().includes(q));
+    }
+    function applySort(rows) {
+      const dir = state.sortDir === 'asc' ? 1 : -1;
+      const key = state.sortKey;
+      return [...rows].sort((a, b) => {
+        let av, bv;
+        if (key === 'name') { av = a.name.toLowerCase(); bv = b.name.toLowerCase(); }
+        else if (key === 'cars') { av = carsForType(a).length; bv = carsForType(b).length; }
+        else if (key === 'channels') { av = a.channels.length; bv = b.channels.length; }
+        else if (key === 'checks') { av = a.checks.filter(c => c.enabled).length; bv = b.checks.filter(c => c.enabled).length; }
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      });
+    }
+
+    function render() {
+      const rows = applySort(applyFilter(types));
+      const body = $('types-body');
+      const empty = $('empty');
+      $('results-count').textContent = `${rows.length} of ${types.length}`;
+
+      if (rows.length === 0) {
+        body.innerHTML = '';
+        empty.style.display = '';
+      } else {
+        empty.style.display = 'none';
+        body.innerHTML = rows.map(t => {
+          const cars = carsForType(t);
+          const enabledChecks = t.checks.filter(c => c.enabled).length;
+          const carPills = cars.length === 0
+            ? '<span class="none">— none</span>'
+            : cars.map(c => `<span class="pill">#${c.number}</span>`).join('');
+          return `
+            <tr tabindex="0" data-id="${t.id}">
+              <td>
+                <div class="type-name">${t.name}</div>
+                <div class="type-desc">${t.description}</div>
+              </td>
+              <td>
+                <div class="car-pills">${carPills}</div>
+              </td>
+              <td>
+                <div class="ct-mono">${t.channels.length}<div class="sub">channels</div></div>
+              </td>
+              <td>
+                <div class="ct-mono">${enabledChecks}<div class="sub">${enabledChecks === t.checks.length ? 'all enabled' : `of ${t.checks.length}`}</div></div>
+              </td>
+              <td><span class="source-pill">${SOURCE_LABEL[t.source] || t.source}</span></td>
+              <td style="text-align:right;"><span class="arrow-end">→</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const k = th.dataset.sort;
+        th.classList.toggle('sorted', k === state.sortKey);
+        const arr = th.querySelector('.arrow');
+        if (arr) arr.textContent = state.sortDir === 'asc' ? '↑' : '↓';
+      });
+    }
+
+    $('search').addEventListener('input', (e) => { state.query = e.target.value; render(); });
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.sort;
+        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        else { state.sortKey = k; state.sortDir = k === 'name' ? 'asc' : 'desc'; }
+        render();
+      });
+    });
+
+    $('types-body').addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-id]');
+      if (!tr) return;
+      location.href = `car-type-detail.html?id=${tr.dataset.id}`;
+    });
+    $('types-body').addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const tr = e.target.closest && e.target.closest('tr[data-id]');
+      if (!tr) return;
+      location.href = `car-type-detail.html?id=${tr.dataset.id}`;
+    });
+
+    $('btn-new-type').addEventListener('click', () => RCH.toast('New car type — would open form'));
+
+    render();
+  </script>
+</body>
+</html>

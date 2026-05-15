@@ -18,17 +18,18 @@
 (function () {
   'use strict';
 
+  // Note: "Events" is a post-v1 advanced feature. Pages exist (events-list,
+  // event-detail, car-event-detail) but not surfaced in nav for MVP.
   const NAV_ITEMS = {
     primary: [
       { key: 'fleet',    href: 'cars-list-d-final.html', ico: '▸', label: 'Fleet' },
-      { key: 'events',   href: 'events-list.html',       ico: '◈', label: 'Events' },
       { key: 'sessions', href: '#', stub: true,          ico: '◇', label: 'Sessions' },
       { key: 'reports',  href: '#', stub: true,          ico: '≡', label: 'Reports' },
     ],
     configure: [
       { key: 'checks',   href: '#', stub: true,         ico: '∷', label: 'Check library' },
       { key: 'channels', href: '#', stub: true,         ico: '⌥', label: 'Channel maps' },
-      { key: 'cartypes', href: '#', stub: true,         ico: '◐', label: 'Car types' },
+      { key: 'cartypes', href: 'car-types.html',        ico: '◐', label: 'Car types' },
       { key: 'settings', href: 'team-settings.html',    ico: '⚙', label: 'Settings' },
     ],
   };

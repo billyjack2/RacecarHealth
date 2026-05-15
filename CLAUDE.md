@@ -87,16 +87,37 @@ for the full planning doc that drove these decisions.
    required-arg query helper (with a lint rule) before any tables go
    in. Retrofitting is painful.
 
-## Required skill marketplaces
+## External skills used by this project
 
-Register these on first use in a clone of the repo:
+Neither of these is a Claude Code marketplace, so `/plugin marketplace
+add` will fail on both. Use the install paths below.
 
+### Matt Pocock's skills (`mattpocock/skills`)
+
+Installed via Matt's own installer — interactive, asks which skills to
+enable and which agents to install them on:
+
+```bash
+npx skills@latest add mattpocock/skills
 ```
-/plugin marketplace add mattpocock/skills
-/plugin marketplace add nimrodfisher/data-analytics-skills
-```
 
-Then run `/setup-matt-pocock-skills` to generate `docs/agents/`.
+When prompted, **make sure `/setup-matt-pocock-skills` is selected**.
+After install, run `/setup-matt-pocock-skills` once in this repo to
+generate `docs/agents/` (it asks about issue tracker, label scheme, and
+docs path).
+
+### Nimrod Fisher's data-analytics skills (`nimrodfisher/data-analytics-skills`)
+
+Not packaged for installation — it's a reference library of skill
+definitions organised by category. Two ways to use it:
+
+1. **Just describe the task in plain language** — Claude will reach for
+   the relevant skill (`programmatic-eda`, `data-quality-audit`,
+   `time-series-analysis`, `root-cause-investigation`, etc.) when the
+   request matches.
+2. If you want them as first-class slash-commands, clone the repo and
+   copy the specific skill folders you want into `.claude/skills/` in
+   this repo (or `~/.claude/skills/` for user-wide).
 
 ## Pointers for future sessions
 
