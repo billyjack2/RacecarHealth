@@ -8,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -85,8 +86,10 @@ export const carTypes = pgTable(
   },
   (t) => [
     index("car_types_team_id_idx").on(t.teamId),
-    // Targets the composite FK on cars(team_id, car_type_id).
-    uniqueIndex("car_types_team_id_id_uq").on(t.teamId, t.id),
+    // Targets the composite FK on cars(team_id, car_type_id). Must be a
+    // unique CONSTRAINT (not just a unique index) — Postgres FKs reference
+    // pg_constraint entries, not bare indexes.
+    unique("car_types_team_id_id_uq").on(t.teamId, t.id),
   ],
 );
 
@@ -112,7 +115,8 @@ export const cars = pgTable(
   (t) => [
     index("cars_team_id_idx").on(t.teamId),
     index("cars_car_type_id_idx").on(t.carTypeId),
-    uniqueIndex("cars_team_id_id_uq").on(t.teamId, t.id),
+    // Unique constraint (not index) — targets the composite FK from sessions.
+    unique("cars_team_id_id_uq").on(t.teamId, t.id),
     foreignKey({
       columns: [t.teamId, t.carTypeId],
       foreignColumns: [carTypes.teamId, carTypes.id],
@@ -142,10 +146,10 @@ export const sessions = pgTable(
   (t) => [
     index("sessions_team_id_idx").on(t.teamId),
     index("sessions_car_id_idx").on(t.carId),
-    // Backs a future composite FK from files(team_id, session_id) when
-    // session bucketing lands; index it now so the schema migration is
-    // additive (no rewrite of the sessions table).
-    uniqueIndex("sessions_team_id_id_uq").on(t.teamId, t.id),
+    // Unique constraint (not just index) so a future composite FK from
+    // files(team_id, session_id) can target it. Cheaper to add now than
+    // to convert a unique index to a constraint later.
+    unique("sessions_team_id_id_uq").on(t.teamId, t.id),
     foreignKey({
       columns: [t.teamId, t.carId],
       foreignColumns: [cars.teamId, cars.id],

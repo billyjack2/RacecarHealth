@@ -83,3 +83,4 @@ drizzle/.snapshot*.json
 .env
 .env.*
 !.env.example
+.vercel
