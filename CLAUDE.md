@@ -119,6 +119,20 @@ definitions organised by category. Two ways to use it:
    copy the specific skill folders you want into `.claude/skills/` in
    this repo (or `~/.claude/skills/` for user-wide).
 
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default kebab-case role strings (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ## Pointers for future sessions
 
 - `/Users/billyjack/.claude/plans/grill-me-and-lets-iridescent-ritchie.md`
