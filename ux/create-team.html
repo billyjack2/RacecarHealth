@@ -72,29 +72,6 @@
       height: 2px; background: var(--accent);
     }
 
-    /* Wizard step indicator */
-    .steps {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 22px;
-      font-family: var(--mono);
-      font-size: 10px; letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    .steps .step { display: inline-flex; align-items: center; gap: 6px; }
-    .steps .step .pin {
-      width: 18px; height: 18px;
-      border: 1px solid var(--border-strong);
-      display: inline-grid; place-items: center;
-      font-size: 10px; color: var(--text-muted);
-    }
-    .steps .step.active { color: var(--accent); }
-    .steps .step.active .pin {
-      border-color: var(--accent); color: var(--accent);
-      background: var(--accent-dim);
-    }
-    .steps .sep { color: var(--text-dim); opacity: 0.6; }
-
     .kicker {
       font-size: 11px; letter-spacing: 3px;
       text-transform: uppercase;
@@ -160,14 +137,6 @@
 
     <main class="pre-main">
       <section class="pre-card" aria-labelledby="card-h">
-        <div class="steps" aria-label="Onboarding progress">
-          <span class="step active"><span class="pin">1</span> Team</span>
-          <span class="sep">›</span>
-          <span class="step"><span class="pin">2</span> First car</span>
-          <span class="sep">›</span>
-          <span class="step"><span class="pin">3</span> First upload</span>
-        </div>
-
         <p class="kicker">Welcome to RaceCarHealth</p>
         <h1 class="head" id="card-h">Create your team</h1>
         <p class="lede">A team is your workspace. Cars, sessions, checks, and reports all belong to one team. You can add teammates after this step.</p>
